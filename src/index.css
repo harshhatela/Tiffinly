@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream-100 text-gray-900 font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Playful selection color */
+  ::selection {
+    background: rgba(255, 107, 44, 0.15);
+    color: #A03A0C;
+  }
+}
+
+@layer components {
+  /* Arty card style — chunky padding, soft shadow, bubbly radius */
+  .card-arty {
+    @apply bg-white rounded-3xl p-5 shadow-card transition-all duration-200;
+  }
+  .card-arty:hover {
+    @apply shadow-card-hover;
+  }
+  .card-arty:active {
+    transform: scale(0.98);
+  }
+
+  /* Pill button style */
+  .btn-pill {
+    @apply px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-200;
+  }
+  .btn-pill:active {
+    transform: scale(0.95);
+  }
+
+  /* Gradient accent backgrounds */
+  .bg-arty-gradient {
+    background: linear-gradient(135deg, #FF6B2C 0%, #FF8C52 50%, #FFB088 100%);
+  }
+  .bg-arty-gradient-warm {
+    background: linear-gradient(135deg, #FF6B2C 0%, #FF7979 100%);
+  }
+  .bg-arty-gradient-sunset {
+    background: linear-gradient(135deg, #FF8C52 0%, #FFD93D 100%);
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Press / tap effect for interactive elements */
+  .press-effect {
+    transition: transform 0.15s ease;
+  }
+  .press-effect:active {
+    transform: scale(0.96);
+  }
+
+  /* Stagger animation delays for lists */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+
+  /* Glassmorphism utility */
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .text-balance { text-wrap: balance; }
+  .bg-cream-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+}
