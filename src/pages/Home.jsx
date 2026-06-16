@@ -17,6 +17,7 @@ export default function Home() {
   const monthStats = useMonthlyTotal(orders, thisMonth);
   const todayOrders = getOrdersForDate(todayYMD);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [ripplingMeal, setRipplingMeal] = useState(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -39,8 +40,12 @@ export default function Home() {
 
   const greeting = getGreeting();
   const greetingEmoji = greeting === 'morning' ? '🌅' : greeting === 'afternoon' ? '👋' : '🌙';
+  const todayDisplay = formatDisplay(today);
 
   const handleMealTap = async (mealKey) => {
+    setRipplingMeal(mealKey);
+    setTimeout(() => setRipplingMeal(null), 500);
+
     // Get current record for today + this meal type
     const existing = todayOrders.find(
       o => o.date === todayYMD && o.mealType === mealKey
@@ -95,13 +100,31 @@ export default function Home() {
       />
 
       <div className="p-4 space-y-6">
+        {/* Greeting card with floating emoji and morph blob */}
+        <div className="relative overflow-hidden bg-cream-100 shadow-neu rounded-4xl px-5 py-5 mb-4">
+          {/* Decorative blob behind content */}
+          <div className="absolute -top-6 -right-6 w-28 h-28 bg-primary/10 rounded-full
+                          animate-morph-blob blur-xl pointer-events-none" />
+
+          <div className="flex items-center justify-between relative z-10">
+            <div>
+              <p className="font-bold text-xl text-gray-900">
+                Good {greeting}! {greetingEmoji}
+              </p>
+              <p className="font-medium text-sm text-gray-400 mt-0.5">{todayDisplay}</p>
+            </div>
+            {/* Floating tiffin icon */}
+            <span className="text-4xl animate-float select-none">🍱</span>
+          </div>
+        </div>
+
         {/* Today's Tiffin Section */}
         <div className="animate-slideUp stagger-1">
           <h2 className="font-bold text-lg text-gray-900 px-1 mb-3">Today's Tiffin</h2>
           <div className="space-y-3">
             {Object.keys(settings.meals)
               .filter(meal => settings.meals[meal].enabled)
-              .map(meal => {
+              .map((meal, index) => {
                 const state = getMealButtonState(meal);
                 const mealInfo = settings.meals[meal];
                 const isOrdered = state === 'ordered';
@@ -118,14 +141,21 @@ export default function Home() {
                   <button
                     key={meal}
                     onClick={() => handleMealTap(meal)}
-                    className={`w-full flex items-center justify-between rounded-3xl px-5 py-4 shadow-soft border active:scale-[0.965] transition-transform duration-100 ${
+                    style={{ animationDelay: `${index * 80}ms` }}
+                    className={`relative overflow-hidden w-full flex items-center justify-between rounded-3xl px-5 py-4 border-0 animate-slide-up opacity-0 [animation-fill-mode:forwards] active:shadow-neu-inset active:scale-[0.98] transition-all duration-150 ${
                       isOrdered
-                        ? `${colors.bg} ${colors.border}`
+                        ? `${colors.bg} shadow-neu-inset`
                         : isSkipped
-                        ? 'bg-cream-50 border-cream-200 opacity-60'
-                        : 'bg-white border-cream-200'
+                        ? 'bg-cream-50 shadow-neu opacity-60'
+                        : 'bg-cream-100 shadow-neu'
                     }`}
                   >
+                    {/* Ripple effect */}
+                    {ripplingMeal === meal && (
+                      <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="w-8 h-8 rounded-full bg-primary/30 animate-ripple" />
+                      </span>
+                    )}
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{mealInfo.emoji}</span>
                       <div className="text-left">
@@ -133,12 +163,12 @@ export default function Home() {
                         <p className="font-medium text-sm text-gray-400">{formatCurrency(mealInfo.price)}</p>
                       </div>
                     </div>
-                    <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                    <span key={state} className={`text-sm font-semibold px-3 py-1 rounded-full animate-pop-in ${
                       isOrdered
                         ? `${colors.text} ${colors.pill}`
                         : isSkipped
                         ? 'text-gray-400 bg-cream-200 line-through'
-                        : 'text-gray-300 bg-cream-100'
+                        : 'text-gray-400 bg-cream-200'
                     }`}>
                       {isOrdered ? 'Ordered ✓' : isSkipped ? 'Skipped' : 'Tap to order'}
                     </span>
@@ -150,14 +180,22 @@ export default function Home() {
 
         {/* Stats Row */}
         <div className="flex gap-4 animate-slideUp stagger-2">
-          <div className="flex-1 bg-primary rounded-3xl px-5 py-4 shadow-orange hover:shadow-lifted transition-shadow duration-200">
-            <p className="text-primary-100 text-xs font-semibold uppercase tracking-wider mb-1">This Month</p>
-            <p className="text-white font-extrabold text-3xl leading-none">{formatCurrency(monthStats.totalAmount)}</p>
-            <p className="text-primary-200 text-xs font-medium mt-1">due to pay</p>
+          <div className="flex-1 bg-cream-100 shadow-neu rounded-3xl px-5 py-4 hover:shadow-lifted transition-shadow duration-200">
+            <p className="text-primary-400 text-xs font-semibold uppercase tracking-wider mb-1">This Month</p>
+            <p className="text-primary font-extrabold text-3xl leading-none">
+              <span key={monthStats.totalAmount} className="inline-block animate-count-up">
+                {formatCurrency(monthStats.totalAmount)}
+              </span>
+            </p>
+            <p className="text-primary-400 text-xs font-medium mt-1">due to pay</p>
           </div>
-          <div className="flex-1 bg-white rounded-3xl px-5 py-4 shadow-soft border border-cream-200 hover:shadow-lifted transition-shadow duration-200">
+          <div className="flex-1 bg-cream-100 shadow-neu rounded-3xl px-5 py-4 hover:shadow-lifted transition-shadow duration-200">
             <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Orders</p>
-            <p className="text-gray-900 font-extrabold text-3xl leading-none">{monthStats.orderCount}</p>
+            <p className="text-gray-900 font-extrabold text-3xl leading-none">
+              <span key={monthStats.orderCount} className="inline-block animate-count-up">
+                {monthStats.orderCount}
+              </span>
+            </p>
             <p className="text-gray-400 text-xs font-medium mt-1">this month</p>
           </div>
         </div>
@@ -168,7 +206,7 @@ export default function Home() {
           <div className="space-y-3">
             {orders.length === 0 ? (
               <div className="text-center py-10 text-gray-400 border-2 border-dashed border-cream-200 rounded-3xl bg-transparent shadow-none">
-                <div className="text-4xl mb-3 opacity-50 grayscale">🍱</div>
+                <div className="text-4xl mb-3 opacity-50 grayscale">☀️</div>
                 <p className="font-medium">No orders yet.</p>
                 <p className="text-sm">Tap above to start tracking!</p>
               </div>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { db, DEFAULT_SETTINGS } from './db/db';
 import { usePWAInstall } from './hooks/usePWAInstall';
@@ -9,6 +9,22 @@ import Parser    from './pages/Parser';
 import Reports   from './pages/Reports';
 import Settings  from './pages/Settings';
 import Onboarding from './pages/Onboarding';
+
+function AppRoutes() {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="animate-slide-up">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/parser" element={<Parser />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </div>
+  );
+}
 
 export default function App() {
   const [onboardingDone, setOnboardingDone] = useState(null); // null = loading
@@ -24,6 +40,10 @@ export default function App() {
           setOnboardingDone(false);
         } else {
           setOnboardingDone(s.onboardingComplete ?? false);
+          if (s.meals?.lunch?.emoji === '🍱') {
+            await db.settings.update(1, { meals: { ...s.meals, lunch: { ...s.meals.lunch, emoji: '☀️' } } });
+            console.log('Migrated lunch emoji to ☀️');
+          }
         }
       } catch (err) {
         console.error('Error initializing app:', err);
@@ -57,25 +77,16 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="max-w-[430px] mx-auto bg-cream-100 bg-cream-grain min-h-screen relative">
-        <Routes>
-          {!onboardingDone ? (
-            <>
-              <Route 
-                path="*" 
-                element={<Onboarding onComplete={() => setOnboardingDone(true)} />} 
-              />
-            </>
-          ) : (
-            <>
-              <Route path="/" element={<Home />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/parser" element={<Parser />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </>
-          )}
-        </Routes>
+        {!onboardingDone ? (
+          <Routes>
+            <Route 
+              path="*" 
+              element={<Onboarding onComplete={() => setOnboardingDone(true)} />} 
+            />
+          </Routes>
+        ) : (
+          <AppRoutes />
+        )}
 
         {showBanner && (
           <div className="fixed bottom-28 left-4 right-4 z-40 bg-white rounded-3xl shadow-lifted

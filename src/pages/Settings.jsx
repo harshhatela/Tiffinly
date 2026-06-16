@@ -2,11 +2,16 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import { useSettings } from '../hooks/useSettings';
 import { db } from '../db/db';
-import { Trash2 } from 'lucide-react';
+import { Trash2, PenLine } from 'lucide-react';
+import { formatCurrency } from '../utils/dateHelpers';
+import { exportBackup, importBackup } from '../utils/backup';
+import { useState } from 'react';
+import { Toast } from '../components/ui/Toast';
 
 export default function Settings() {
   const navigate = useNavigate();
   const { settings, saveSettings, loading } = useSettings();
+  const [toast, setToast] = useState(null);
 
   if (loading) {
     return (
@@ -59,6 +64,37 @@ export default function Settings() {
     });
   };
 
+  const handleExport = async () => {
+    try {
+      await exportBackup();
+      setToast({ message: 'Backup exported!', type: 'success' });
+    } catch (err) {
+      setToast({ message: 'Export failed. Try again.', type: 'error' });
+    }
+  };
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const confirm = window.confirm(
+      'Importing will REPLACE all your current data. This cannot be undone. Continue?'
+    );
+    if (!confirm) return;
+
+    const result = await importBackup(file);
+    if (result.success) {
+      setToast({ message: `Restored ${result.ordersImported} orders!`, type: 'success' });
+      // Reload the page so all hooks re-fetch fresh data
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      setToast({ message: result.error, type: 'error' });
+    }
+
+    // Reset file input
+    e.target.value = '';
+  };
+
   const handleClearAllData = async () => {
     if (window.confirm('This will delete all your orders and settings permanently. Are you sure?')) {
       try {
@@ -80,9 +116,11 @@ export default function Settings() {
     <div className="pb-24">
       <PageHeader title="Settings" subtitle="Customize your experience" />
 
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+
       <div className="p-4 space-y-6">
         {/* Profile Section */}
-        <div className="bg-white rounded-3xl p-5 shadow-soft border border-cream-200">
+        <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center text-3xl font-extrabold shadow-orange">
               {settings.serviceName.charAt(0).toUpperCase()}
@@ -105,7 +143,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 shadow-soft border border-cream-200">
+        <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your WhatsApp Name</label>
             <input
               type="text"
@@ -132,7 +170,7 @@ export default function Settings() {
             const bgClass = mealColors[meal]?.bg || 'bg-lunch-bg';
 
             return (
-              <div key={meal} className="bg-white rounded-3xl p-4 shadow-soft border border-cream-200">
+              <div key={meal} className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-colors ${isMealEnabled ? bgClass : 'bg-cream-100 grayscale opacity-50'}`}>
@@ -143,7 +181,7 @@ export default function Settings() {
                         {mealInfo.label || meal}
                       </p>
                       {isMealEnabled && (
-                        <p className="text-sm font-medium text-gray-500">₹{mealInfo.price} per meal</p>
+                        <p className="text-sm font-medium text-gray-500">{formatCurrency(mealInfo.price)} per meal</p>
                       )}
                     </div>
                   </div>
@@ -180,6 +218,45 @@ export default function Settings() {
           })}
         </div>
 
+        {/* Backup & Restore section */}
+        <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
+          <h3 className="font-bold text-base text-gray-900 mb-1">Backup & Restore</h3>
+          <p className="text-xs font-medium text-gray-400 mb-4">
+            Keep a copy of your data. Restore when switching devices.
+          </p>
+
+          {/* Export button */}
+          <button
+            onClick={handleExport}
+            className="w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-sm
+                       shadow-orange active:scale-[0.97] transition-transform mb-3"
+          >
+            ↓ Export Backup (.json)
+          </button>
+
+          {/* Import button — file picker trigger */}
+          <label
+            htmlFor="backup-import"
+            className="w-full py-3.5 rounded-2xl bg-cream-100 shadow-neu text-gray-700
+                       font-bold text-sm flex items-center justify-center cursor-pointer
+                       active:shadow-neu-inset transition-all"
+          >
+            ↑ Import Backup
+          </label>
+          <input
+            id="backup-import"
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={handleImport}
+          />
+
+          {/* Info text */}
+          <p className="text-[11px] text-gray-400 text-center mt-3">
+            Your data stays on your device — backups are local files only.
+          </p>
+        </div>
+
         {/* Danger zone */}
         <div className="space-y-3 pt-4 border-t border-cream-200">
           <h3 className="text-xs font-bold text-red-400 uppercase tracking-widest px-1">Danger Zone</h3>
@@ -194,7 +271,7 @@ export default function Settings() {
 
         {/* App info */}
         <div className="text-center text-sm text-gray-500 py-4">
-          <p>Made for tiffin lovers 🍱</p>
+          <p>Made for tiffin lovers ☀️</p>
           <p>Version 0.1.0</p>
         </div>
       </div>

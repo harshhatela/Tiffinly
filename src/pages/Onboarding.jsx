@@ -32,7 +32,7 @@ export default function Onboarding({ onComplete }) {
         onboardingComplete: true,
         meals: {
           breakfast: { ...formData.meals.breakfast, emoji: '🌅', label: 'Breakfast' },
-          lunch: { ...formData.meals.lunch, emoji: '🍱', label: 'Lunch' },
+          lunch: { ...formData.meals.lunch, emoji: '☀️', label: 'Lunch' },
           dinner: { ...formData.meals.dinner, emoji: '🌙', label: 'Dinner' },
         },
       });
@@ -206,7 +206,7 @@ function StepMealTypes({ meals, onToggle }) {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Which meals do you subscribe to?</h2>
       <div className="flex gap-3">
         {Object.keys(meals).map(mealType => {
-          const mealEmoji = mealType === 'breakfast' ? '🌅' : mealType === 'lunch' ? '🍱' : '🌙';
+          const mealEmoji = mealType === 'breakfast' ? '🌅' : mealType === 'lunch' ? '☀️' : '🌙';
           const mealLabel = mealType.charAt(0).toUpperCase() + mealType.slice(1);
           return meals[mealType].enabled ? (
             <button

@@ -7,6 +7,7 @@ import { db } from '../db/db';
 import { toYM, formatMonth, getWeekNumber, formatCurrency } from '../utils/dateHelpers';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Share2, CheckCircle2, Circle } from 'lucide-react';
+import AnimatedNumber from '../components/ui/AnimatedNumber';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => {
   const d = new Date();
@@ -18,7 +19,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => {
 });
 
 export default function Reports() {
-  const { settings } = useSettings();
+  const { settings, loading: settingsLoading } = useSettings();
   const { orders } = useOrders();
   const [selectedMonth, setSelectedMonth] = useState(MONTHS[0].value);
   const [paymentStatus, setPaymentStatus] = useState({});
@@ -31,6 +32,14 @@ export default function Reports() {
     };
     loadPaymentStatus();
   }, [selectedMonth]);
+
+  if (settingsLoading || !settings) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-400 font-medium animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   const handleTogglePaid = async () => {
     const newStatus = !paymentStatus.paid;
@@ -61,7 +70,7 @@ export default function Reports() {
       `📦 Tiffinly — ${formatMonth(new Date(selectedMonth + '-01'))} Summary`,
       `━━━━━━━━━━━━━━━━━━`,
       breakdown.breakfast?.count > 0 ? `🌅 Breakfast: ${breakdown.breakfast.count} × ${formatCurrency(settings.meals.breakfast.price)} = ${formatCurrency(breakdown.breakfast.amount)}` : null,
-      breakdown.lunch?.count > 0     ? `🍱 Lunch:     ${breakdown.lunch.count} × ${formatCurrency(settings.meals.lunch.price)} = ${formatCurrency(breakdown.lunch.amount)}` : null,
+      breakdown.lunch?.count > 0     ? `☀️ Lunch:     ${breakdown.lunch.count} × ${formatCurrency(settings.meals.lunch.price)} = ${formatCurrency(breakdown.lunch.amount)}` : null,
       breakdown.dinner?.count > 0    ? `🌙 Dinner:    ${breakdown.dinner.count} × ${formatCurrency(settings.meals.dinner.price)} = ${formatCurrency(breakdown.dinner.amount)}` : null,
       `━━━━━━━━━━━━━━━━━━`,
       `Total: ${monthStats.orderCount} orders · ${formatCurrency(monthStats.totalAmount)}`,
@@ -101,12 +110,12 @@ export default function Reports() {
         </div>
 
         {/* Summary card */}
-        <div className="bg-gradient-to-br from-primary to-primary-600 rounded-4xl p-5 shadow-orange animate-slideUp stagger-2">
+        <div className="bg-gradient-to-br from-primary to-primary-600 rounded-4xl p-5 shadow-orange animate-pop-in stagger-2">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-primary-200 text-xs font-semibold uppercase tracking-wider">{formatMonth(new Date(selectedMonth + '-01'))}</p>
-              <p className="text-white font-extrabold text-4xl leading-none mt-1">{formatCurrency(monthStats.totalAmount)}</p>
-              <p className="text-primary-100 text-sm font-medium mt-1">{monthStats.orderCount} tiffins ordered</p>
+              <p className="text-white font-extrabold text-4xl leading-none mt-1"><AnimatedNumber value={monthStats.totalAmount} prefix="₹" /></p>
+              <p className="text-primary-100 text-sm font-medium mt-1"><AnimatedNumber value={monthStats.orderCount} suffix=" tiffins ordered" /></p>
             </div>
             {/* Paid/Unpaid toggle */}
             <button
@@ -131,7 +140,7 @@ export default function Reports() {
 
         {/* Chart */}
         {chartData.length > 0 && (
-          <div className="bg-white rounded-3xl p-5 shadow-soft animate-slideUp stagger-3">
+          <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 animate-slideUp stagger-3">
             <h3 className="font-bold text-gray-900 mb-6 px-1">Order Trend</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
@@ -159,7 +168,7 @@ export default function Reports() {
         )}
 
         {/* Meal breakdown */}
-        <div className="bg-white rounded-3xl p-5 shadow-soft animate-slideUp stagger-4">
+        <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 animate-slideUp stagger-4">
           <h3 className="font-bold text-gray-900 mb-4">Breakdown</h3>
           <div className="flex flex-col">
             {Object.keys(settings.meals)

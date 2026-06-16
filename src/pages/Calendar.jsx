@@ -11,7 +11,7 @@ import {
   isFuture,
   formatCurrency,
 } from '../utils/dateHelpers';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 
 // A safer getMonthDays that returns day numbers 1-31
 function getSafeMonthDays(year, month) {
@@ -24,11 +24,19 @@ function getSafeMonthDays(year, month) {
 }
 
 export default function Calendar() {
-  const { settings } = useSettings();
-  const { orders, logOrder } = useOrders();
+  const { settings, loading: settingsLoading } = useSettings();
+  const { orders, logOrder, removeOrder } = useOrders();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showSheet, setShowSheet] = useState(false);
+
+  if (settingsLoading || !settings) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-400 font-medium animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
@@ -37,19 +45,27 @@ export default function Calendar() {
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); // 0 = Sunday
   const monthName = formatMonth(currentDate);
 
+  const today = new Date();
+  const currentYear  = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+
+  const isNextDisabled = (year === currentYear && month >= currentMonth)
+                      || (year > currentYear);
+
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, month - 2, 1));
   };
 
   const handleNextMonth = () => {
-    if (!isFuture(new Date(year, month + 1, 1))) {
+    if (!isNextDisabled) {
       setCurrentDate(new Date(year, month, 1));
     }
   };
 
   const handleDateClick = (day) => {
-    if (!isFuture(new Date(year, month - 1, day))) {
-      setSelectedDate(new Date(year, month - 1, day));
+    const date = new Date(year, month - 1, day);
+    if (!isFuture(date)) {
+      setSelectedDate(date);
       setShowSheet(true);
     }
   };
@@ -89,7 +105,7 @@ export default function Calendar() {
           <h2 className="text-xl font-bold text-gray-900 tracking-wide">{monthName}</h2>
           <button
             onClick={handleNextMonth}
-            disabled={isFuture(new Date(year, month, 1))}
+            disabled={isNextDisabled}
             className="p-3 hover:bg-gray-100 rounded-2xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed press-effect"
           >
             <ChevronRight size={20} className="text-gray-600" />
@@ -97,7 +113,7 @@ export default function Calendar() {
         </div>
 
         {/* Calendar Card */}
-        <div className="bg-cream-50 rounded-4xl shadow-soft p-4">
+        <div className="bg-cream-50 rounded-4xl shadow-neu p-4">
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-2 mb-3">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
@@ -115,29 +131,31 @@ export default function Calendar() {
             ))}
 
             {/* Day cells */}
-            {days.map(day => {
+            {days.map((day, dayIndex) => {
               const date = new Date(year, month - 1, day);
               const state = getDayState(day);
               const isTodayCell = isToday(date);
               const isFutureDay = isFuture(date);
 
-              let cellClass = 'w-10 h-10 mx-auto rounded-2xl flex items-center justify-center transition-transform active:scale-[0.965] ';
+              let cellClass = 'w-10 h-10 mx-auto rounded-2xl flex flex-col items-center justify-center transition-transform active:scale-[0.965] animate-slide-up opacity-0 [animation-fill-mode:forwards] ';
               let textClass = 'font-medium text-sm ';
+              let isOrdered = false;
 
               if (isFutureDay) {
-                cellClass += 'opacity-30 pointer-events-none';
-                textClass += 'text-gray-400';
+                cellClass += 'opacity-30 pointer-events-none ';
+                textClass += 'text-gray-400 ';
               } else if (state === 'all-ordered' || state === 'partial') {
-                cellClass += 'bg-primary shadow-orange';
-                textClass += 'text-white font-bold';
+                cellClass += 'bg-cream-100 shadow-neu-inset ';
+                textClass += 'font-bold text-sm text-primary ';
+                isOrdered = true;
               } else if (state === 'all-skipped') {
-                cellClass += 'bg-cream-200';
-                textClass += 'text-gray-400 line-through';
+                cellClass += 'bg-cream-200 ';
+                textClass += 'text-gray-400 line-through ';
               } else if (isTodayCell) {
-                cellClass += 'border-2 border-primary';
-                textClass += 'text-primary font-bold';
+                cellClass += 'border-2 border-primary ';
+                textClass += 'text-primary font-bold ';
               } else {
-                textClass += 'text-gray-500';
+                textClass += 'text-gray-500 ';
               }
 
               return (
@@ -145,9 +163,11 @@ export default function Calendar() {
                   key={day}
                   onClick={() => handleDateClick(day)}
                   disabled={isFutureDay}
+                  style={{ animationDelay: `${dayIndex * 12}ms` }}
                   className={cellClass}
                 >
                   <span className={textClass}>{day}</span>
+                  {isOrdered && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />}
                 </button>
               );
             })}
@@ -155,7 +175,7 @@ export default function Calendar() {
 
           {monthOrderCount === 0 && !isFuture(new Date(year, month - 1, 1)) && (
             <div className="py-8 flex flex-col items-center gap-2 text-center">
-              <span className="text-4xl">🍱</span>
+              <span className="text-4xl">☀️</span>
               <p className="font-bold text-base text-gray-900">No orders this month</p>
               <p className="font-medium text-sm text-gray-400 max-w-[220px]">
                 Use the Home screen to start tracking, or import from WhatsApp.
@@ -180,13 +200,14 @@ export default function Calendar() {
           onClose={() => setShowSheet(false)}
           isOpen={showSheet}
           onSave={logOrder}
+          onDelete={removeOrder}
         />
       )}
     </div>
   );
 }
 
-function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave }) {
+function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDelete }) {
   const dateStr = toYMD(date);
   const dayOrders = orders.filter(o => o.date === dateStr);
 
@@ -196,8 +217,16 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave }) {
     dinner: dayOrders.find(o => o.mealType === 'dinner')?.ordered ?? null,
   });
 
-  const handleMealChange = (mealType, newState) => {
+  const handleSetMealState = (mealType, newState) => {
     setMealStates(prev => ({ ...prev, [mealType]: newState }));
+  };
+
+  const handleDeleteMealRecord = async (mealKey) => {
+    const existing = dayOrders.find(o => o.mealType === mealKey);
+    if (existing && onDelete) {
+      await onDelete(existing.id);
+    }
+    setMealStates(prev => ({ ...prev, [mealKey]: null }));
   };
 
   const handleSave = async () => {
@@ -229,46 +258,47 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave }) {
       <div className="space-y-4 pt-2">
         {Object.keys(settings.meals)
           .filter(meal => settings.meals[meal].enabled)
-          .map(meal => (
-            <div key={meal} className="bg-gray-50 p-4 rounded-3xl border border-gray-100">
-              <label className="block text-sm font-bold text-gray-900 mb-3 px-1">
-                <span className="text-lg mr-2">{settings.meals[meal].emoji}</span>
-                {settings.meals[meal].label}
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleMealChange(meal, true)}
-                  className={`flex-1 py-3 px-2 rounded-2xl font-bold text-sm transition-all press-effect ${
-                    mealStates[meal] === true
-                      ? 'bg-arty-gradient text-white shadow-arty-sm'
-                      : 'bg-white text-gray-500 border border-gray-200 hover:border-primary-200'
-                  }`}
-                >
-                  Ordered
-                </button>
-                <button
-                  onClick={() => handleMealChange(meal, false)}
-                  className={`flex-1 py-3 px-2 rounded-2xl font-bold text-sm transition-all press-effect ${
-                    mealStates[meal] === false
-                      ? 'bg-gray-800 text-white shadow-md'
-                      : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  Skipped
-                </button>
-                <button
-                  onClick={() => handleMealChange(meal, null)}
-                  className={`w-14 py-3 rounded-2xl font-bold text-lg transition-all press-effect ${
-                    mealStates[meal] === null
-                      ? 'bg-gray-300 text-white shadow-inner'
-                      : 'bg-white text-gray-400 border border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  -
-                </button>
+          .map(meal => {
+            const existingOrder = { ordered: mealStates[meal] };
+            return (
+              <div key={meal} className="bg-cream-50 p-4 rounded-3xl border border-cream-200">
+                <label className="block text-sm font-bold text-gray-900 px-1">
+                  <span className="text-lg mr-2">{settings.meals[meal].emoji}</span>
+                  {settings.meals[meal].label}
+                </label>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => handleSetMealState(meal, true)}
+                    className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
+                      ${existingOrder?.ordered === true
+                        ? 'bg-primary text-white shadow-orange'
+                        : 'bg-cream-100 text-gray-400 border border-cream-200'
+                      }`}
+                  >
+                    ✓ Ordered
+                  </button>
+                  <button
+                    onClick={() => handleSetMealState(meal, false)}
+                    className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
+                      ${existingOrder?.ordered === false
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-cream-100 text-gray-400 border border-cream-200'
+                      }`}
+                  >
+                    ✗ Skipped
+                  </button>
+                  <button
+                    onClick={() => handleDeleteMealRecord(meal)}
+                    disabled={existingOrder?.ordered === null}
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center text-red-400 bg-red-50 border border-red-100 disabled:opacity-30 active:scale-95 transition-all"
+                    title="Delete record"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
 
       <button

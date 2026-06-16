@@ -16,7 +16,7 @@ export const DEFAULT_SETTINGS = {
   onboardingComplete: false,
   meals: {
     breakfast: { enabled: false, price: 0,   emoji: '🌅', label: 'Breakfast' },
-    lunch:     { enabled: true,  price: 100, emoji: '🍱', label: 'Lunch' },
+    lunch:     { enabled: true,  price: 100, emoji: '☀️', label: 'Lunch' },
     dinner:    { enabled: true,  price: 80,  emoji: '🌙', label: 'Dinner' },
   },
 };
