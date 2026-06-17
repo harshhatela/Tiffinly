@@ -87,6 +87,17 @@ export default function Parser() {
 
   const handleImageAnalyse = async () => {
     if (!imageFile || !settings?.whatsappName) return;
+
+    // Check if API is accessible (no-cors check)
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    if (!apiKey) {
+      setParseError(
+        'Google Gemini API key not configured. Add VITE_GEMINI_API_KEY to .env.local — get one free at aistudio.google.com.'
+      );
+      setIsAnalysing(false);
+      return;
+    }
+
     setIsAnalysing(true);
     setParseError(null);
 
@@ -101,55 +112,66 @@ export default function Parser() {
 
       const mediaType = imageFile.type;
 
-      // Call Anthropic API with vision
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const visionPrompt = `You are analyzing a WhatsApp group chat screenshot for a tiffin (meal delivery) service.
+
+CRITICAL RULE: In WhatsApp, the user's OWN messages appear on the RIGHT SIDE as green/teal bubbles with NO name above them. Everyone else's messages appear on the LEFT with their name in colored text above them.
+
+Your task: Find ALL messages on the RIGHT SIDE ONLY (green bubbles, right-aligned, no name label). These are the user's own order responses. Completely ignore all left-side messages.
+
+For each right-side message found:
+1. Find the nearest date separator line ABOVE it. These look like "19 May 2026" or "Yesterday" or "Today" centered on screen.
+2. Note the TIME shown on the message bubble (e.g., "7:05 pm", "6:57 pm").
+3. Classify the message text as:
+   - ordered=true  → yes, y, haan, ha, han, haa, ji, ok, okay, ✅, 👍, sure, 1, yep, h
+   - ordered=false → no, n, nahi, nope, nai, noi, ni, ❌, 👎, mat, skip, 0, band
+   - IGNORE anything else (menu items, questions, unrelated text, ambiguous messages)
+
+Conversions:
+- Date: convert to YYYY-MM-DD. "19 May 2026" → "2026-05-19". "Yesterday" → ${new Date(Date.now()-86400000).toISOString().split('T')[0]}. "Today" → ${new Date().toISOString().split('T')[0]}.
+- Time: convert to 24-hour. "7:05 pm" → "19:05". "11:30 am" → "11:30".
+- Meal type from time: 05:00–10:59 → "breakfast", 11:00–16:59 → "lunch", 17:00–23:59 → "dinner".
+
+Only include messages from month: ${selectedMonth} (YYYY-MM format).
+
+Respond ONLY with a valid JSON array. No explanation, no markdown fences, no extra text:
+[{"date":"2026-05-19","mealType":"dinner","ordered":true,"rawMessage":"Yes","time":"19:05"}]
+
+If no right-side messages are visible or none match the target month, return exactly: []`;
+
+      const GEMINI_MODEL = 'gemini-1.5-flash';
+      const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+      const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: [
+          contents: [{
+            parts: [
               {
-                type: 'image',
-                source: { type: 'base64', media_type: mediaType, data: base64 },
+                inline_data: {
+                  mime_type: mediaType,
+                  data: base64,
+                },
               },
               {
-                type: 'text',
-                text: `This is a screenshot of a WhatsApp group chat for a tiffin (meal delivery) service.
-
-Extract all messages sent by the person named "${settings.whatsappName}" for the month ${selectedMonth}.
-
-For each message, determine:
-1. The date (format: YYYY-MM-DD)
-2. The time (24-hour format)
-3. Whether the message means they want to ORDER ("yes", "haan", "ha", "ok", "✅", "👍") or SKIP ("no", "nahi", "nope", "❌", "👎")
-4. Meal type based on time: 5:00-10:59 = breakfast, 11:00-16:59 = lunch, 17:00-23:59 = dinner
-
-Respond ONLY with a JSON array. No explanation, no markdown, no preamble:
-[
-  {
-    "date": "YYYY-MM-DD",
-    "mealType": "lunch",
-    "ordered": true,
-    "rawMessage": "original message text"
-  }
-]
-
-If no messages from "${settings.whatsappName}" are visible, return: []`
-              }
-            ]
-          }]
-        })
+                text: visionPrompt,
+              },
+            ],
+          }],
+          generationConfig: {
+            temperature:     0.1,
+            maxOutputTokens: 1024,
+          },
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(`API error: ${response.status} — ${errBody?.error?.message || 'Unknown'}`);
       }
 
       const data = await response.json();
-      const raw = data.content?.find(b => b.type === 'text')?.text ?? '[]';
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
 
       // Strip any markdown fences if present
       const clean = raw.replace(/```json|```/g, '').trim();
@@ -188,12 +210,18 @@ If no messages from "${settings.whatsappName}" are visible, return: []`
       }
 
     } catch (err) {
-      console.error('Image analysis failed:', err);
-      setParseError(
-        err.message.includes('API error')
-          ? 'Analysis failed. Check your connection and try again.'
-          : 'Could not read this image. Try a clearer screenshot.'
-      );
+      console.error('Gemini image analysis error:', err);
+      if (err.message.includes('401') || err.message.includes('403')) {
+        setParseError('Invalid or missing Gemini API key. Check VITE_GEMINI_API_KEY in .env.local.');
+      } else if (err.message.includes('429')) {
+        setParseError('Gemini rate limit hit. Wait a moment and try again (free tier limit).');
+      } else if (err.message.includes('API error')) {
+        setParseError(`Analysis failed: ${err.message}. Try again or use Text Import.`);
+      } else if (err.message.includes('JSON') || err.message.includes('parse')) {
+        setParseError('Gemini returned an unexpected format. Try a clearer screenshot or use Text Import.');
+      } else {
+        setParseError('Image analysis failed. Try a clearer screenshot or switch to Text Import.');
+      }
     } finally {
       setIsAnalysing(false);
     }
@@ -239,10 +267,30 @@ If no messages from "${settings.whatsappName}" are visible, return: []`
                   : 'text-gray-400'
                 }`}
             >
-              {tab.label}
+              {tab.key === 'text' ? '📋 Paste Text' : (
+                <span className="flex items-center justify-center gap-1.5">
+                  📸 Image
+                  <span className="text-[9px] font-bold bg-amber-100 text-amber-600
+                                   px-1.5 py-0.5 rounded-full leading-none">
+                    BETA
+                  </span>
+                </span>
+              )}
             </button>
           ))}
         </div>
+
+        {activeTab === 'image' && (
+          <div className="flex items-start gap-2 bg-blue-50 border border-blue-100
+                          rounded-2xl px-4 py-3 mb-4">
+            <span className="text-blue-400 mt-0.5 flex-shrink-0">ℹ️</span>
+            <p className="text-blue-700 text-xs font-medium leading-relaxed">
+              <span className="font-bold">Text Import is more accurate.</span>{' '}
+              For best results, export your WhatsApp chat (⋮ → More → Export Chat → Without Media)
+              and paste it in the Text tab. Image import is a beta fallback for when export isn't possible.
+            </p>
+          </div>
+        )}
 
         {/* How-to card */}
         <div className="bg-cream-100 shadow-neu rounded-3xl mb-4 overflow-hidden">
@@ -330,6 +378,25 @@ If no messages from "${settings.whatsappName}" are visible, return: []`
             {/* ===== IMAGE TAB ===== */}
             {activeTab === 'image' && (
               <div className="flex flex-col items-center gap-4">
+                {/* API Key Warning */}
+                {!import.meta.env.VITE_GEMINI_API_KEY && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4 w-full">
+                    <p className="text-amber-700 text-xs font-semibold">
+                      ⚠️ Image analysis needs a free API key.{' '}
+                      <a
+                        href="https://aistudio.google.com/apikey"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Get one free at aistudio.google.com
+                      </a>{' '}
+                      then add <code className="bg-amber-100 px-1 rounded">VITE_GEMINI_API_KEY</code> to{' '}
+                      <code className="bg-amber-100 px-1 rounded">.env.local</code>.
+                    </p>
+                  </div>
+                )}
+                
                 {/* Upload area */}
                 <label
                   htmlFor="chat-image-upload"
