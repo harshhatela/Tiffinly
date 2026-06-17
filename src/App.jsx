@@ -9,6 +9,7 @@ import Parser    from './pages/Parser';
 import Reports   from './pages/Reports';
 import Settings  from './pages/Settings';
 import Onboarding from './pages/Onboarding';
+import Feedback   from './pages/Feedback';
 
 function AppRoutes() {
   const location = useLocation();
@@ -20,6 +21,7 @@ function AppRoutes() {
         <Route path="/parser" element={<Parser />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
@@ -76,7 +78,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="max-w-[430px] mx-auto bg-cream-100 bg-cream-grain min-h-screen relative">
+      <div className="max-w-[430px] mx-auto bg-cream-100 bg-cream-grain min-h-screen relative pb-28">
         {!onboardingDone ? (
           <Routes>
             <Route 

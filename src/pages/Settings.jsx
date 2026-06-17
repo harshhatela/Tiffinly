@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import { useSettings } from '../hooks/useSettings';
 import { db } from '../db/db';
-import { Trash2, PenLine } from 'lucide-react';
+import { Trash2, PenLine, Moon, Sun, MessageSquarePlus } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../utils/dateHelpers';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import { Toast } from '../components/ui/Toast';
 export default function Settings() {
   const navigate = useNavigate();
   const { settings, saveSettings, loading } = useSettings();
+  const { theme, toggleTheme } = useTheme();
   const [toast, setToast] = useState(null);
 
   if (loading) {
@@ -119,6 +121,36 @@ export default function Settings() {
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
       <div className="p-4 space-y-6">
+        {/* Appearance Section */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Appearance</h3>
+          <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-cream-50 flex items-center justify-center text-gray-600 border border-cream-200">
+                {theme === 'dark' ? <Moon size={24} /> : <Sun size={24} />}
+              </div>
+              <div>
+                <p className="font-bold text-base text-gray-900">Dark Mode</p>
+                <p className="text-sm font-medium text-gray-500">Toggle dark theme</p>
+              </div>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className={`relative w-[52px] h-[30px] rounded-full transition-colors duration-300
+                ${theme === 'dark' ? 'bg-primary' : 'bg-cream-200 shadow-neu-inset'}`}
+            >
+              <div className={`absolute top-[3px] w-6 h-6 rounded-full bg-white shadow-soft
+                               flex items-center justify-center transition-all duration-300
+                               ${theme === 'dark' ? 'left-[23px]' : 'left-[3px]'}`}>
+                {theme === 'dark'
+                  ? <Moon size={12} className="text-primary" />
+                  : <Sun  size={12} className="text-amber-500" />
+                }
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Profile Section */}
         <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
           <div className="flex items-center gap-4">
@@ -218,6 +250,7 @@ export default function Settings() {
           })}
         </div>
 
+
         {/* Backup & Restore section */}
         <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
           <h3 className="font-bold text-base text-gray-900 mb-1">Backup & Restore</h3>
@@ -269,10 +302,27 @@ export default function Settings() {
           </button>
         </div>
 
+        {/* Support */}
+        <div className="space-y-3 pt-4 border-t border-cream-200">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Support</h3>
+          <button
+            onClick={() => navigate('/feedback')}
+            className="w-full bg-cream-100 shadow-neu rounded-2xl px-5 py-4 flex items-center justify-between text-gray-900 font-bold active:scale-[0.965] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <MessageSquarePlus size={20} className="text-primary" />
+              Report a Problem / Feedback
+            </div>
+          </button>
+        </div>
+
         {/* App info */}
         <div className="text-center text-sm text-gray-500 py-4">
           <p>Made for tiffin lovers ☀️</p>
           <p>Version 0.1.0</p>
+          <p className="text-xs text-gray-400 text-center mt-2">
+            To use your own logo: save it as <code>public/icon.png</code> and rebuild.
+          </p>
         </div>
       </div>
     </div>

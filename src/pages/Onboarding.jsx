@@ -187,7 +187,7 @@ function StepWelcome() {
 function StepServiceName({ value, onChange }) {
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">What's your tiffin service called?</h2>
+      <h2 className="font-display text-2xl font-bold text-gray-900 mb-6">What's your tiffin service called?</h2>
       <input
         type="text"
         value={value}
@@ -203,7 +203,7 @@ function StepServiceName({ value, onChange }) {
 function StepMealTypes({ meals, onToggle }) {
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Which meals do you subscribe to?</h2>
+      <h2 className="font-display text-2xl font-bold text-gray-900 mb-6">Which meals do you subscribe to?</h2>
       <div className="flex gap-3">
         {Object.keys(meals).map(mealType => {
           const mealEmoji = mealType === 'breakfast' ? '🌅' : mealType === 'lunch' ? '☀️' : '🌙';
@@ -236,7 +236,7 @@ function StepMealTypes({ meals, onToggle }) {
 function StepMealPrices({ meals, onUpdate }) {
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">How much per meal?</h2>
+      <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">How much per meal?</h2>
       <p className="text-sm text-gray-500 mb-6">You can change this later in settings.</p>
       <div className="space-y-3">
         {Object.keys(meals)
@@ -266,7 +266,7 @@ function StepMealPrices({ meals, onUpdate }) {
 function StepWhatsAppName({ value, onChange }) {
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Your name in the tiffin group</h2>
+      <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">Your name in the tiffin group</h2>
       <p className="text-sm text-gray-500 mb-6">
         This is how Tiffinly finds your messages when you import a chat.
       </p>

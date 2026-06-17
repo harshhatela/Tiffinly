@@ -84,4 +84,96 @@
   .bg-cream-grain {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   }
+
+/* ═══════════════════════════════════════════════════
+   TIFFINLY DARK MODE — Crisp, High-Contrast Dark Theme
+   Background hierarchy: page → card → raised → input
+   ═══════════════════════════════════════════════════ */
+
+/* Page background */
+.dark body,
+.dark .min-h-screen,
+.dark .bg-cream-100 { background-color: #0C0C0F !important; }
+
+/* Card surfaces */
+.dark .bg-white,
+.dark .bg-cream-50  { background-color: #17171B !important; }
+
+/* Elevated / secondary surfaces */
+.dark .bg-cream-200 { background-color: #1F1F25 !important; }
+
+/* Borders */
+.dark .border-cream-200 { border-color: #26262E !important; }
+.dark .border-cream-300 { border-color: #30303A !important; }
+.dark .border            { border-color: #26262E !important; }
+
+/* Text hierarchy */
+.dark .text-gray-900 { color: #F0F0F5 !important; }
+.dark .text-gray-800 { color: #D8D8E0 !important; }
+.dark .text-gray-700 { color: #C0C0CC !important; }
+.dark .text-gray-600 { color: #9090A0 !important; }
+.dark .text-gray-500 { color: #7A7A88 !important; }
+.dark .text-gray-400 { color: #5A5A68 !important; }
+.dark .text-gray-300 { color: #404050 !important; }
+
+/* Input fields */
+.dark input,
+.dark textarea { background-color: #17171B !important; color: #F0F0F5 !important; }
+.dark input::placeholder,
+.dark textarea::placeholder { color: #404050 !important; }
+
+/* ── Neumorphic shadows — dark version ───────────────────────────────── */
+/* In dark mode, neumorphism shifts to subtle border glow, not emboss */
+.dark .shadow-neu {
+  box-shadow:
+    0 2px 8px  rgba(0, 0, 0, 0.55),
+    0 0   0 1px rgba(255, 255, 255, 0.04) !important;
+}
+.dark .shadow-neu-sm {
+  box-shadow:
+    0 1px 4px  rgba(0, 0, 0, 0.5),
+    0 0   0 1px rgba(255, 255, 255, 0.03) !important;
+}
+.dark .shadow-neu-inset {
+  box-shadow:
+    inset 0 2px 6px  rgba(0, 0, 0, 0.55),
+    inset 0 0   0 1px rgba(255, 255, 255, 0.03) !important;
+}
+.dark .shadow-soft {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
+.dark .shadow-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+.dark .shadow-lifted {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
+}
+.dark .shadow-orange {
+  box-shadow:
+    0 6px 20px rgba(255, 107, 44, 0.30),
+    0 2px 8px  rgba(255, 107, 44, 0.20) !important;
+}
+
+/* ── Specific component overrides ────────────────────────────────────── */
+
+/* Home hero card stays orange gradient in dark mode — no change needed */
+
+/* Bottom sheet backdrop in dark mode */
+.dark .bg-black\/50  { background-color: rgba(0, 0, 0, 0.75) !important; }
+
+/* Recharts dark mode */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical   line {
+  stroke: #26262E;
+}
+.dark .recharts-text { fill: #7A7A88; }
+
+/* Amber warning in dark mode */
+.dark .bg-amber-50  { background-color: rgba(251, 191, 36, 0.08) !important; }
+.dark .bg-red-50    { background-color: rgba(239, 68,  68, 0.08) !important; }
+.dark .bg-green-50  { background-color: rgba(34,  197, 94, 0.08) !important; }
+.dark .bg-blue-50   { background-color: rgba(59,  130, 246,0.08) !important; }
+
+/* Skeleton loading in dark mode */
+.dark .animate-pulse { background-color: #1F1F25 !important; }
 }

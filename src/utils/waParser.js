@@ -8,6 +8,20 @@
  * @param {object} mealPrices - { breakfast: 50, lunch: 100, dinner: 80 }
  * @returns {Array}           - Deduplicated array of parsed order objects, sorted by date
  */
+export function parseDateSeparator(str) {
+  // Handles: "19 May 2026", "9 May 2026", "19 May, 2026"
+  const months = {
+    jan:1, feb:2, mar:3, apr:4, may:5, jun:6,
+    jul:7, aug:8, sep:9, oct:10, nov:11, dec:12
+  };
+  const match = str.trim().match(/^(\d{1,2})\s+([A-Za-z]+),?\s+(\d{4})$/);
+  if (!match) return null;
+  const [, d, m, y] = match;
+  const mon = months[m.toLowerCase().substring(0,3)];
+  if (!mon) return null;
+  return `${y}-${String(mon).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
 export function parseWhatsAppChat(rawText, userName, month, mealPrices) {
   // Handles both common WhatsApp export formats:
   // iOS:     "[DD/MM/YYYY, HH:MM:SS] Name: message"
@@ -24,13 +38,26 @@ export function parseWhatsAppChat(rawText, userName, month, mealPrices) {
   const NEGATIVE = [
     'no', 'n', 'nahi', 'nope', 'skip', 'band',
     '❌', '👎', 'mat', 'nah', '0', 'na', 'nai',
+    'noi', 'ni',
   ];
 
   const lines = rawText.split('\n');
   const results = [];
   const [targetYear, targetMonth] = month.split('-').map(Number);
 
+  let currentTrackedDate = null;
+  
   for (const line of lines) {
+    // Try "D Month YYYY" format first (newer WhatsApp export)
+    const dateSepMatch = line.match(
+      /(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*,?\s+\d{4})/i
+    );
+    if (dateSepMatch) {
+      currentTrackedDate = parseDateSeparator(dateSepMatch[1]);
+      // This is a date separator line, update current tracking date
+      // (only relevant for text parser — skip for image parser)
+    }
+
     let match = null;
     for (const pattern of PATTERNS) {
       match = line.match(pattern);

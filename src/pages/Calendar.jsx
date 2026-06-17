@@ -13,6 +13,24 @@ import {
 } from '../utils/dateHelpers';
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 
+const DoodleCircle = () => (
+  <svg className="absolute inset-0 w-full h-full pointer-events-none scale-[1.1]" viewBox="0 0 100 100">
+    <path d="M50,10 C75,12 90,30 88,55 C86,80 65,92 40,88 C15,84 8,60 12,35 C16,10 40,8 50,10 Z" fill="none" stroke="#FF6B2C" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const DoodleX = () => (
+  <svg className="absolute inset-0 w-full h-full pointer-events-none scale-[0.6]" viewBox="0 0 100 100">
+    <path d="M20,20 C40,40 60,60 80,80 M80,20 C60,40 40,60 20,80" fill="none" stroke="#9CA3AF" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const DoodleDot = () => (
+  <svg className="absolute inset-0 w-full h-full pointer-events-none scale-[1]" viewBox="0 0 100 100">
+    <circle cx="50" cy="85" r="7" fill="#FF6B2C" />
+  </svg>
+);
+
 // A safer getMonthDays that returns day numbers 1-31
 function getSafeMonthDays(year, month) {
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -42,7 +60,9 @@ export default function Calendar() {
   const month = currentDate.getMonth() + 1;
   const monthYM = toYM(currentDate);
   const days = getSafeMonthDays(year, month);
-  const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); // 0 = Sunday
+  const firstDay = new Date(year, month - 1, 1);
+  const dayOfWeek = firstDay.getDay(); // 0=Sun
+  const startOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Mon=0
   const monthName = formatMonth(currentDate);
 
   const today = new Date();
@@ -95,28 +115,36 @@ export default function Calendar() {
 
       <div className="p-4 animate-slideUp stagger-1">
         {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-6 bg-white rounded-3xl p-2 shadow-card">
-          <button
-            onClick={handlePrevMonth}
-            className="p-3 hover:bg-gray-100 rounded-2xl transition-colors press-effect"
-          >
-            <ChevronLeft size={20} className="text-gray-600" />
-          </button>
-          <h2 className="text-xl font-bold text-gray-900 tracking-wide">{monthName}</h2>
-          <button
-            onClick={handleNextMonth}
-            disabled={isNextDisabled}
-            className="p-3 hover:bg-gray-100 rounded-2xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed press-effect"
-          >
-            <ChevronRight size={20} className="text-gray-600" />
-          </button>
+        <div className="flex items-center justify-between mb-6 px-1">
+          <h2 className="font-display text-4xl font-extrabold text-gray-900 tracking-tight">{monthName}</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrevMonth}
+              className="w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
+                         shadow-neu-sm flex items-center justify-center
+                         text-gray-600 dark:text-gray-400
+                         active:shadow-neu-inset transition-all text-sm font-bold"
+            >
+              ‹
+            </button>
+            <button
+              onClick={handleNextMonth}
+              disabled={isNextDisabled}
+              className="w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
+                         shadow-neu-sm flex items-center justify-center
+                         text-gray-600 dark:text-gray-400
+                         active:shadow-neu-inset transition-all text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ›
+            </button>
+          </div>
         </div>
 
         {/* Calendar Card */}
-        <div className="bg-cream-50 rounded-4xl shadow-neu p-4">
+        <div className="mx-4 bg-white dark:bg-[#17171B] rounded-4xl shadow-card p-5">
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-2 mb-3">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
               <span key={i} className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">
                 {day}
               </span>
@@ -126,7 +154,7 @@ export default function Calendar() {
           {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-2">
             {/* Empty cells */}
-            {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+            {Array.from({ length: startOffset }).map((_, i) => (
               <div key={`empty-${i}`} className="w-10 h-10 mx-auto" />
             ))}
 
@@ -137,23 +165,25 @@ export default function Calendar() {
               const isTodayCell = isToday(date);
               const isFutureDay = isFuture(date);
 
-              let cellClass = 'w-10 h-10 mx-auto rounded-2xl flex flex-col items-center justify-center transition-transform active:scale-[0.965] animate-slide-up opacity-0 [animation-fill-mode:forwards] ';
-              let textClass = 'font-medium text-sm ';
-              let isOrdered = false;
+              let cellClass = 'w-10 h-10 mx-auto flex flex-col items-center justify-center relative rounded-2xl active:scale-[0.96] transition-transform duration-[80ms] ease-out select-none touch-manipulation animate-slide-up opacity-0 [animation-fill-mode:forwards] ';
+              let textClass = 'font-display font-medium text-[17px] z-10 ';
+              let marker = null;
 
               if (isFutureDay) {
                 cellClass += 'opacity-30 pointer-events-none ';
                 textClass += 'text-gray-400 ';
-              } else if (state === 'all-ordered' || state === 'partial') {
-                cellClass += 'bg-cream-100 shadow-neu-inset ';
-                textClass += 'font-bold text-sm text-primary ';
-                isOrdered = true;
+              } else if (state === 'all-ordered') {
+                textClass += 'font-bold text-gray-900 ';
+                marker = <DoodleCircle />;
+              } else if (state === 'partial') {
+                textClass += 'font-bold text-gray-900 ';
+                marker = <DoodleDot />;
               } else if (state === 'all-skipped') {
-                cellClass += 'bg-cream-200 ';
-                textClass += 'text-gray-400 line-through ';
+                textClass += 'text-gray-400 ';
+                marker = <DoodleX />;
               } else if (isTodayCell) {
-                cellClass += 'border-2 border-primary ';
-                textClass += 'text-primary font-bold ';
+                textClass += 'font-bold text-primary ';
+                cellClass += 'bg-primary/10 ';
               } else {
                 textClass += 'text-gray-500 ';
               }
@@ -167,7 +197,7 @@ export default function Calendar() {
                   className={cellClass}
                 >
                   <span className={textClass}>{day}</span>
-                  {isOrdered && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />}
+                  {marker}
                 </button>
               );
             })}
@@ -183,10 +213,20 @@ export default function Calendar() {
             </div>
           )}
 
-          {/* Footer summary */}
-          <div className="mt-4 pt-4 border-t border-cream-200 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500">{monthOrderCount} orders this month</span>
-            <span className="font-bold text-base text-primary">{formatCurrency(monthTotal)}</span>
+          {/* Legend */}
+          <div className="mt-6 pt-5 border-t border-gray-100 flex justify-center gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-6 h-6 relative flex items-center justify-center"><DoodleCircle /><span className="text-[11px] font-bold text-gray-900 z-10">8</span></div>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Ordered</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-6 h-6 relative flex items-center justify-center"><DoodleDot /><span className="text-[11px] font-bold text-gray-900 z-10">8</span></div>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Partial</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-6 h-6 relative flex items-center justify-center"><DoodleX /><span className="text-[11px] font-bold text-gray-400 z-10">8</span></div>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Skipped</span>
+            </div>
           </div>
         </div>
       </div>
@@ -271,8 +311,8 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
                     onClick={() => handleSetMealState(meal, true)}
                     className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
                       ${existingOrder?.ordered === true
-                        ? 'bg-primary text-white shadow-orange'
-                        : 'bg-cream-100 text-gray-400 border border-cream-200'
+                        ? 'bg-gray-900 text-white shadow-card'
+                        : 'bg-white text-gray-400 border border-gray-200'
                       }`}
                   >
                     ✓ Ordered
@@ -281,8 +321,8 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
                     onClick={() => handleSetMealState(meal, false)}
                     className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
                       ${existingOrder?.ordered === false
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-cream-100 text-gray-400 border border-cream-200'
+                        ? 'bg-gray-900 text-white shadow-card'
+                        : 'bg-white text-gray-400 border border-gray-200'
                       }`}
                   >
                     ✗ Skipped

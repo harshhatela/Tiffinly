@@ -113,9 +113,9 @@ export default function Reports() {
         <div className="bg-gradient-to-br from-primary to-primary-600 rounded-4xl p-5 shadow-orange animate-pop-in stagger-2">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-primary-200 text-xs font-semibold uppercase tracking-wider">{formatMonth(new Date(selectedMonth + '-01'))}</p>
-              <p className="text-white font-extrabold text-4xl leading-none mt-1"><AnimatedNumber value={monthStats.totalAmount} prefix="₹" /></p>
-              <p className="text-primary-100 text-sm font-medium mt-1"><AnimatedNumber value={monthStats.orderCount} suffix=" tiffins ordered" /></p>
+              <p className="font-sans text-primary-200 text-xs font-semibold uppercase tracking-wider">{formatMonth(new Date(selectedMonth + '-01'))}</p>
+              <p className="font-display text-white font-extrabold text-4xl leading-none mt-1"><AnimatedNumber value={monthStats.totalAmount} prefix="₹" /></p>
+              <p className="font-sans text-primary-100 text-sm font-medium mt-1"><AnimatedNumber value={monthStats.orderCount} suffix=" tiffins ordered" /></p>
             </div>
             {/* Paid/Unpaid toggle */}
             <button
@@ -141,7 +141,7 @@ export default function Reports() {
         {/* Chart */}
         {chartData.length > 0 && (
           <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 animate-slideUp stagger-3">
-            <h3 className="font-bold text-gray-900 mb-6 px-1">Order Trend</h3>
+            <h3 className="font-display font-bold text-gray-900 mb-6 px-1">Order Trend</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -157,7 +157,7 @@ export default function Reports() {
                     fontWeight: 'bold',
                   }}
                 />
-                <Bar dataKey="count" fill="#FF6B2C" radius={[6, 6, 6, 6]} barSize={32}>
+                <Bar dataKey="count" fill="#FF6B2C" radius={[8, 8, 0, 0]} maxBarSize={36}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? '#FF6B2C' : '#FFC4A0'} />
                   ))}
@@ -169,7 +169,7 @@ export default function Reports() {
 
         {/* Meal breakdown */}
         <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 animate-slideUp stagger-4">
-          <h3 className="font-bold text-gray-900 mb-4">Breakdown</h3>
+          <h3 className="font-display font-bold text-gray-900 mb-4">Breakdown</h3>
           <div className="flex flex-col">
             {Object.keys(settings.meals)
               .filter(meal => settings.meals[meal].enabled)
@@ -182,17 +182,23 @@ export default function Reports() {
                 const bgClass = mealColors[meal]?.bg || 'bg-lunch-bg';
                 
                 return (
-                  <div key={meal} className="flex items-center justify-between py-3 border-b border-cream-200">
+                  <div key={meal} className="flex items-center justify-between py-3.5 border-b border-cream-200 dark:border-[#26262E]">
                     <div className="flex items-center gap-3">
-                      <span className={`w-8 h-8 rounded-xl ${bgClass} flex items-center justify-center text-base`}>
+                      <div className={`w-9 h-9 rounded-xl ${bgClass} flex items-center justify-center text-lg flex-shrink-0`}>
                         {settings.meals[meal].emoji}
-                      </span>
-                      <span className="font-semibold text-sm text-gray-900">{settings.meals[meal].label}</span>
+                      </div>
+                      <div>
+                        <p className="font-sans font-semibold text-sm text-gray-900 dark:text-gray-100">
+                          {settings.meals[meal].label}
+                        </p>
+                        <p className="font-sans text-xs text-gray-400">
+                          {monthStats.breakdown[meal]?.count || 0} orders
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-sm text-gray-900">{formatCurrency(monthStats.breakdown[meal]?.amount || 0)}</p>
-                      <p className="font-medium text-xs text-gray-400">{monthStats.breakdown[meal]?.count || 0} orders</p>
-                    </div>
+                    <p className="font-display font-bold text-base text-gray-900 dark:text-gray-100">
+                      {formatCurrency(monthStats.breakdown[meal]?.amount || 0)}
+                    </p>
                   </div>
                 );
               })}

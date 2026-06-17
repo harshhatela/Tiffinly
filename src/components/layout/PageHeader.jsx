@@ -1,18 +1,55 @@
-export default function PageHeader({ title, subtitle, rightAction, showLogo }) {
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Settings } from 'lucide-react';
+
+export default function PageHeader({ title, subtitle }) {
+  const navigate       = useNavigate();
+  const { pathname }   = useLocation();
+  const isHome         = pathname === '/';
   return (
-    <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100/50 p-4 sticky top-0 z-40">
-      <div className="flex justify-between items-center gap-2">
-        <div className="flex-1 flex items-center gap-3">
-          {showLogo && (
-            <img src="/logo.png" alt="Tiffinly" className="h-8 object-contain" />
+    <header className="bg-cream-100 dark:bg-[#0C0C0F] px-4 pt-12 pb-4
+                        sticky top-0 z-30
+                        border-b border-cream-200/50 dark:border-[#26262E]/50
+                        backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          {isHome ? (
+            <img
+              src="/logo.png"
+              alt="Tiffinly"
+              className="h-7 object-contain object-left"
+              style={{ maxWidth: '120px' }}
+            />
+          ) : (
+            <>
+              <h1 className="font-display font-bold text-xl text-gray-900
+                             dark:text-gray-100 truncate">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="font-sans text-xs text-gray-400 mt-0.5 truncate">
+                  {subtitle}
+                </p>
+              )}
+            </>
           )}
-          <div>
-            <h1 className="font-bold text-xl text-gray-900">{title}</h1>
-            {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
-          </div>
         </div>
-        {rightAction && <div>{rightAction}</div>}
+
+        {/* Settings gear — only on Home */}
+        {isHome && (
+          <button
+            onClick={() => navigate('/settings')}
+            className="w-9 h-9 rounded-xl bg-cream-100 dark:bg-[#1F1F25]
+                       shadow-neu-sm flex items-center justify-center ml-3 flex-shrink-0
+                       active:shadow-neu-inset transition-all"
+          >
+            <Settings
+              size={17}
+              className="text-gray-500 dark:text-gray-400"
+              strokeWidth={1.8}
+            />
+          </button>
+        )}
       </div>
-    </div>
+    </header>
   );
 }

@@ -85,42 +85,67 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-cream-100 pb-28">
-      <PageHeader
-        showLogo={true}
-        title={`Good ${greeting}! ${greetingEmoji}`}
-        subtitle={formatDisplay(today)}
-        rightAction={
-          <button
-            onClick={() => navigate('/settings')}
-            className="p-2.5 bg-white shadow-card hover:shadow-card-hover rounded-2xl transition-all press-effect"
-          >
-            <Settings size={20} className="text-gray-600" />
-          </button>
-        }
-      />
+      <PageHeader />
 
       <div className="p-4 space-y-6">
-        {/* Greeting card with floating emoji and morph blob */}
-        <div className="relative overflow-hidden bg-cream-100 shadow-neu rounded-4xl px-5 py-5 mb-4">
-          {/* Decorative blob behind content */}
-          <div className="absolute -top-6 -right-6 w-28 h-28 bg-primary/10 rounded-full
-                          animate-morph-blob blur-xl pointer-events-none" />
+        {/* Greeting card */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary to-primary-600
+                        rounded-4xl px-5 py-5 mb-4 shadow-orange">
 
-          <div className="flex items-center justify-between relative z-10">
-            <div>
-              <p className="font-bold text-xl text-gray-900">
-                Good {greeting}! {greetingEmoji}
-              </p>
-              <p className="font-medium text-sm text-gray-400 mt-0.5">{todayDisplay}</p>
+          {/* Decorative blobs */}
+          <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full
+                          bg-white/10 blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full
+                          bg-black/10 blur-xl pointer-events-none" />
+
+          <div className="relative z-10">
+            {/* Small label */}
+            <p className="font-sans text-xs font-semibold text-white/70 uppercase tracking-wider mb-0.5">
+              TODAY
+            </p>
+            {/* Date */}
+            <p className="font-display font-bold text-white text-sm mb-2">
+              {todayDisplay}
+            </p>
+
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="font-sans text-white/80 text-sm mb-0.5">
+                  {greeting}, {settings.whatsappName || 'there'}!
+                </p>
+                <p className="font-display font-bold text-white text-2xl leading-tight">
+                  Ready for today's meals?
+                </p>
+              </div>
+              {/* Floating icon */}
+              <span className="text-5xl animate-float select-none drop-shadow-lg ml-2">{greetingEmoji}</span>
             </div>
-            {/* Floating tiffin icon */}
-            <span className="text-4xl animate-float select-none">🍱</span>
+
+            {/* Inline stats */}
+            <div className="flex gap-3 mt-4">
+              <div className="flex-1 bg-white/15 backdrop-blur-sm rounded-2xl px-3 py-2.5">
+                <p className="font-sans text-white/60 text-[10px] font-semibold uppercase tracking-wider">
+                  This Month
+                </p>
+                <p className="font-display font-extrabold text-white text-xl leading-none mt-0.5">
+                  {formatCurrency(monthStats.totalAmount)}
+                </p>
+              </div>
+              <div className="flex-1 bg-white/15 backdrop-blur-sm rounded-2xl px-3 py-2.5">
+                <p className="font-sans text-white/60 text-[10px] font-semibold uppercase tracking-wider">
+                  Orders
+                </p>
+                <p className="font-display font-extrabold text-white text-xl leading-none mt-0.5">
+                  {monthStats.orderCount}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Today's Tiffin Section */}
         <div className="animate-slideUp stagger-1">
-          <h2 className="font-bold text-lg text-gray-900 px-1 mb-3">Today's Tiffin</h2>
+          <p className="font-display font-bold text-lg text-gray-900 dark:text-gray-100 mb-3">Today's Tiffin</p>
           <div className="space-y-3">
             {Object.keys(settings.meals)
               .filter(meal => settings.meals[meal].enabled)
@@ -142,7 +167,7 @@ export default function Home() {
                     key={meal}
                     onClick={() => handleMealTap(meal)}
                     style={{ animationDelay: `${index * 80}ms` }}
-                    className={`relative overflow-hidden w-full flex items-center justify-between rounded-3xl px-5 py-4 border-0 animate-slide-up opacity-0 [animation-fill-mode:forwards] active:shadow-neu-inset active:scale-[0.98] transition-all duration-150 ${
+                    className={`relative overflow-hidden w-full flex items-center justify-between rounded-3xl px-5 py-4 border-0 animate-slide-up opacity-0 [animation-fill-mode:forwards] active:shadow-neu-inset active:scale-[0.96] transition-all duration-[80ms] ease-out ${
                       isOrdered
                         ? `${colors.bg} shadow-neu-inset`
                         : isSkipped
@@ -178,37 +203,21 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="flex gap-4 animate-slideUp stagger-2">
-          <div className="flex-1 bg-cream-100 shadow-neu rounded-3xl px-5 py-4 hover:shadow-lifted transition-shadow duration-200">
-            <p className="text-primary-400 text-xs font-semibold uppercase tracking-wider mb-1">This Month</p>
-            <p className="text-primary font-extrabold text-3xl leading-none">
-              <span key={monthStats.totalAmount} className="inline-block animate-count-up">
-                {formatCurrency(monthStats.totalAmount)}
-              </span>
-            </p>
-            <p className="text-primary-400 text-xs font-medium mt-1">due to pay</p>
-          </div>
-          <div className="flex-1 bg-cream-100 shadow-neu rounded-3xl px-5 py-4 hover:shadow-lifted transition-shadow duration-200">
-            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Orders</p>
-            <p className="text-gray-900 font-extrabold text-3xl leading-none">
-              <span key={monthStats.orderCount} className="inline-block animate-count-up">
-                {monthStats.orderCount}
-              </span>
-            </p>
-            <p className="text-gray-400 text-xs font-medium mt-1">this month</p>
-          </div>
-        </div>
+
 
         {/* Recent Activity */}
         <div className="animate-slideUp stagger-3">
-          <h2 className="font-bold text-lg text-gray-900 px-1 mb-3">Recent Activity</h2>
+          <p className="font-display font-bold text-lg text-gray-900 dark:text-gray-100 mb-3">Recent Activity</p>
           <div className="space-y-3">
             {orders.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 border-2 border-dashed border-cream-200 rounded-3xl bg-transparent shadow-none">
-                <div className="text-4xl mb-3 opacity-50 grayscale">☀️</div>
-                <p className="font-medium">No orders yet.</p>
-                <p className="text-sm">Tap above to start tracking!</p>
+              <div className="flex flex-col items-center py-10 gap-3">
+                <span className="text-5xl opacity-40">🍽️</span>
+                <p className="font-display font-semibold text-base text-gray-400">
+                  No orders yet
+                </p>
+                <p className="font-sans text-sm text-gray-400 text-center max-w-[200px]">
+                  Tap a meal above to start tracking today's tiffin
+                </p>
               </div>
             ) : (
               orders
