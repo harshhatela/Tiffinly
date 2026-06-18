@@ -78,7 +78,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="max-w-[430px] mx-auto bg-cream-100 bg-cream-grain min-h-screen relative pb-28">
+      <div className="max-w-[430px] mx-auto bg-cream-100 bg-cream-grain min-h-screen relative pb-24">
         {!onboardingDone ? (
           <Routes>
             <Route 

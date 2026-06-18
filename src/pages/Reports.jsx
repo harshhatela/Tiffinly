@@ -101,7 +101,7 @@ export default function Reports() {
               className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-transform active:scale-[0.965] ${
                 selectedMonth === m.value
                   ? 'bg-primary text-white shadow-orange'
-                  : 'bg-white text-gray-500 shadow-soft border border-cream-200'
+                  : 'bg-cream-200 dark:bg-[#1F1F25] text-gray-500 dark:text-gray-400 border border-cream-300 dark:border-[#30303A]'
               }`}
             >
               {m.label}

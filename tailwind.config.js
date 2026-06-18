@@ -39,8 +39,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Baloo 2', 'system-ui', 'sans-serif'],
-        sans: ['Nunito', 'system-ui', 'sans-serif'],
+        display: ['Bree Serif', 'Georgia', 'serif'],   // headings, amounts, page titles
+        sans:    ['Nunito', 'system-ui', 'sans-serif'], // body, labels, buttons
       },
       borderRadius: {
         '2xl': '16px',
@@ -87,6 +87,7 @@ export default {
         'morph-blob': 'morphBlob 8s ease-in-out infinite',
         'ripple':     'ripple 0.5s ease-out forwards',
         'bubblePop':  'bubblePop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards',
+        'fade-label': 'fadeLabel 200ms ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -161,6 +162,10 @@ export default {
           '55%':  { transform: 'scale(1.12) translateY(-3px)', opacity: '1'    },
           '80%':  { transform: 'scale(0.97) translateY(0)',    opacity: '1'    },
           '100%': { transform: 'scale(1)    translateY(0)',    opacity: '1'    },
+        },
+        fadeLabel: {
+          '0%':   { opacity: '0', transform: 'translateX(-4px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)'     },
         },
       },
     },

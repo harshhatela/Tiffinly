@@ -324,7 +324,7 @@ If no right-side messages are visible or none match the target month, return exa
                 className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedMonth === m.value
                     ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-cream-200 dark:bg-[#1F1F25] text-gray-500 dark:text-gray-400 border border-cream-300 dark:border-[#30303A]'
                 }`}
               >
                 {m.label}
@@ -354,7 +354,7 @@ If no right-side messages are visible or none match the target month, return exa
                 </div>
 
                 {/* Name confirmation */}
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm bg-cream-50 dark:bg-[#17171B] text-gray-700 dark:text-gray-300 p-3 rounded-lg">
                   Searching for messages from: <span className="font-semibold">{settings.whatsappName}</span>
                   <button
                     onClick={() => window.alert('Edit name in Settings')}

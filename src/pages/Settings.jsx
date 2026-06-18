@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import { useSettings } from '../hooks/useSettings';
 import { db } from '../db/db';
-import { Trash2, PenLine, Moon, Sun, MessageSquarePlus } from 'lucide-react';
+import { Trash2, PenLine, MessageSquarePlus } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import ThemeSwitch from '../components/ui/ThemeSwitch';
 import { formatCurrency } from '../utils/dateHelpers';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useState } from 'react';
@@ -124,30 +125,18 @@ export default function Settings() {
         {/* Appearance Section */}
         <div className="space-y-3">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Appearance</h3>
-          <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-cream-50 flex items-center justify-center text-gray-600 border border-cream-200">
-                {theme === 'dark' ? <Moon size={24} /> : <Sun size={24} />}
-              </div>
+          <div className="bg-cream-100 dark:bg-[#17171B] shadow-neu rounded-3xl p-5 mb-4">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-base text-gray-900">Dark Mode</p>
-                <p className="text-sm font-medium text-gray-500">Toggle dark theme</p>
+                <p className="font-display font-bold text-base text-gray-900 dark:text-gray-100">
+                  Appearance
+                </p>
+                <p className="font-sans text-xs text-gray-400 mt-0.5">
+                  {theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode'}
+                </p>
               </div>
+              <ThemeSwitch />
             </div>
-            <button
-              onClick={toggleTheme}
-              className={`relative w-[52px] h-[30px] rounded-full transition-colors duration-300
-                ${theme === 'dark' ? 'bg-primary' : 'bg-cream-200 shadow-neu-inset'}`}
-            >
-              <div className={`absolute top-[3px] w-6 h-6 rounded-full bg-white shadow-soft
-                               flex items-center justify-center transition-all duration-300
-                               ${theme === 'dark' ? 'left-[23px]' : 'left-[3px]'}`}>
-                {theme === 'dark'
-                  ? <Moon size={12} className="text-primary" />
-                  : <Sun  size={12} className="text-amber-500" />
-                }
-              </div>
-            </button>
           </div>
         </div>
 

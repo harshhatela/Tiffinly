@@ -6,6 +6,7 @@ import { useSettings } from '../hooks/useSettings';
 import { useOrders } from '../hooks/useOrders';
 import { useMonthlyTotal } from '../hooks/useMonthlyTotal';
 import { formatDisplay, getGreeting, toYMD, toYM, formatCurrency } from '../utils/dateHelpers';
+import '../styles/MealCard.css';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -167,13 +168,15 @@ export default function Home() {
                     key={meal}
                     onClick={() => handleMealTap(meal)}
                     style={{ animationDelay: `${index * 80}ms` }}
-                    className={`relative overflow-hidden w-full flex items-center justify-between rounded-3xl px-5 py-4 border-0 animate-slide-up opacity-0 [animation-fill-mode:forwards] active:shadow-neu-inset active:scale-[0.96] transition-all duration-[80ms] ease-out ${
-                      isOrdered
-                        ? `${colors.bg} shadow-neu-inset`
-                        : isSkipped
-                        ? 'bg-cream-50 shadow-neu opacity-60'
-                        : 'bg-cream-100 shadow-neu'
-                    }`}
+                    className={`relative overflow-hidden w-full flex items-center justify-between
+                                rounded-3xl px-5 py-4 border animate-slide-up opacity-0 [animation-fill-mode:forwards]
+                                active:scale-[0.96] transition-all duration-[80ms] ease-out
+                                ${isOrdered
+                                  ? `${colors.border} meal-card-ordered ${colors.bg} shadow-neu-inset`
+                                  : isSkipped
+                                  ? 'border-transparent meal-card-skipped'
+                                  : 'border-white/10 meal-card-unordered'
+                                }`}
                   >
                     {/* Ripple effect */}
                     {ripplingMeal === meal && (
@@ -181,19 +184,25 @@ export default function Home() {
                         <span className="w-8 h-8 rounded-full bg-primary/30 animate-ripple" />
                       </span>
                     )}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 relative z-10">
                       <span className="text-2xl">{mealInfo.emoji}</span>
                       <div className="text-left">
-                        <p className="font-bold text-base text-gray-900">{mealInfo.label}</p>
-                        <p className="font-medium text-sm text-gray-400">{formatCurrency(mealInfo.price)}</p>
+                        <p className={`font-display font-bold text-base
+                          ${!isOrdered && !isSkipped ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
+                          {mealInfo.label}
+                        </p>
+                        <p className={`font-sans font-medium text-sm
+                          ${!isOrdered && !isSkipped ? 'text-white/70' : 'text-gray-400'}`}>
+                          {formatCurrency(mealInfo.price)}
+                        </p>
                       </div>
                     </div>
-                    <span key={state} className={`text-sm font-semibold px-3 py-1 rounded-full animate-pop-in ${
+                    <span key={state} className={`text-sm font-semibold font-sans px-3 py-1.5 rounded-full relative z-10 animate-pop-in ${
                       isOrdered
                         ? `${colors.text} ${colors.pill}`
                         : isSkipped
-                        ? 'text-gray-400 bg-cream-200 line-through'
-                        : 'text-gray-400 bg-cream-200'
+                        ? 'bg-white/10 text-white/50 line-through'
+                        : 'bg-white/20 text-white text-xs'
                     }`}>
                       {isOrdered ? 'Ordered ✓' : isSkipped ? 'Skipped' : 'Tap to order'}
                     </span>

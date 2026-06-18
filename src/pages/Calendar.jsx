@@ -12,6 +12,7 @@ import {
   formatCurrency,
 } from '../utils/dateHelpers';
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import '../styles/EP133Buttons.css';
 
 const DoodleCircle = () => (
   <svg className="absolute inset-0 w-full h-full pointer-events-none scale-[1.1]" viewBox="0 0 100 100">
@@ -306,34 +307,26 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
                   <span className="text-lg mr-2">{settings.meals[meal].emoji}</span>
                   {settings.meals[meal].label}
                 </label>
-                <div className="flex items-center gap-2 mt-3">
+                <div className="flex items-center gap-2 mt-2">
                   <button
                     onClick={() => handleSetMealState(meal, true)}
-                    className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
-                      ${existingOrder?.ordered === true
-                        ? 'bg-gray-900 text-white shadow-card'
-                        : 'bg-white text-gray-400 border border-gray-200'
-                      }`}
+                    className={`ep133-btn-ordered flex-1 ${existingOrder?.ordered === true ? 'is-active' : ''}`}
                   >
                     ✓ Ordered
                   </button>
                   <button
                     onClick={() => handleSetMealState(meal, false)}
-                    className={`flex-1 py-2.5 rounded-2xl text-sm font-bold transition-all active:scale-95
-                      ${existingOrder?.ordered === false
-                        ? 'bg-gray-900 text-white shadow-card'
-                        : 'bg-white text-gray-400 border border-gray-200'
-                      }`}
+                    className={`ep133-btn-skipped flex-1 ${existingOrder?.ordered === false ? 'is-active' : ''}`}
                   >
                     ✗ Skipped
                   </button>
                   <button
                     onClick={() => handleDeleteMealRecord(meal)}
                     disabled={existingOrder?.ordered === null}
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center text-red-400 bg-red-50 border border-red-100 disabled:opacity-30 active:scale-95 transition-all"
-                    title="Delete record"
+                    className="ep133-btn-delete flex-shrink-0"
+                    aria-label="Delete"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
