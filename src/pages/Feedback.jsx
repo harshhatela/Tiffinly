@@ -98,7 +98,7 @@ export default function Feedback() {
 
         <button
           onClick={handleShare}
-          className="w-full bg-primary text-white font-bold text-lg py-4 rounded-2xl shadow-orange active:scale-[0.97] transition-transform flex items-center justify-center gap-2"
+          className="btn-tactile w-full bg-primary text-white font-bold text-lg py-4 rounded-2xl shadow-orange transition-transform flex items-center justify-center gap-2"
         >
           <Share2 size={20} />
           Send Feedback

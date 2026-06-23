@@ -253,7 +253,8 @@ If no right-side messages are visible or none match the target month, return exa
 
       <div className="p-4 space-y-6">
         {/* Tab Switcher */}
-        <div className="flex bg-cream-100 shadow-neu-inset rounded-2xl p-1 gap-1 mb-4">
+        <div className="flex bg-cream-200 dark:bg-[#0C0C0F] rounded-2xl p-1.5 gap-1.5 mb-4
+                        relative overflow-hidden">
           {[
             { key: 'text',  label: '📋 Paste Text' },
             { key: 'image', label: '📸 Image'      },
@@ -261,10 +262,11 @@ If no right-side messages are visible or none match the target month, return exa
             <button
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); setResults(null); setParseError(null); }}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all
+              className={`flex-1 py-2.5 rounded-xl text-sm font-bold font-sans
+                transition-all duration-200 relative z-10
                 ${activeTab === tab.key
-                  ? 'bg-white shadow-soft text-primary'
-                  : 'text-gray-400'
+                  ? 'bg-white dark:bg-[#1F1F25] text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)]'
+                  : 'text-gray-400 dark:text-gray-500'
                 }`}
             >
               {tab.key === 'text' ? '📋 Paste Text' : (
@@ -296,7 +298,7 @@ If no right-side messages are visible or none match the target month, return exa
         <div className="bg-cream-100 shadow-neu rounded-3xl mb-4 overflow-hidden">
           <button
             onClick={() => setShowHowTo(!showHowTo)}
-            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            className="btn-tactile w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-2">
               <InfoIcon size={20} className="text-primary" />
@@ -321,7 +323,7 @@ If no right-side messages are visible or none match the target month, return exa
               <button
                 key={m.value}
                 onClick={() => setSelectedMonth(m.value)}
-                className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`btn-tactile px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedMonth === m.value
                     ? 'bg-primary text-white'
                     : 'bg-cream-200 dark:bg-[#1F1F25] text-gray-500 dark:text-gray-400 border border-cream-300 dark:border-[#30303A]'
@@ -368,7 +370,7 @@ If no right-side messages are visible or none match the target month, return exa
                 <button
                   onClick={handleParse}
                   disabled={loading}
-                  className="w-full bg-primary text-white py-3 rounded-2xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50"
+                  className="btn-tactile w-full bg-primary text-white py-3 rounded-2xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50"
                 >
                   {loading ? 'Analysing...' : 'Analyse Chat ✦'}
                 </button>
@@ -443,8 +445,8 @@ If no right-side messages are visible or none match the target month, return exa
                   <button
                     onClick={handleImageAnalyse}
                     disabled={isAnalysing}
-                    className="w-full py-4 rounded-2xl bg-primary text-white font-bold
-                               shadow-orange active:scale-[0.97] transition-transform
+                    className="btn-tactile w-full py-4 rounded-2xl bg-primary text-white font-bold
+                               shadow-orange transition-transform
                                disabled:opacity-60"
                   >
                     {isAnalysing ? 'Analysing image...' : 'Analyse Image ✦'}
@@ -519,7 +521,7 @@ If no right-side messages are visible or none match the target month, return exa
             <div className="flex gap-3">
               <button
                 onClick={handleSave}
-                className="flex-1 bg-primary text-white py-3 rounded-2xl font-semibold hover:bg-primary-600 transition-colors"
+                className="btn-tactile flex-1 bg-primary text-white py-3 rounded-2xl font-semibold hover:bg-primary-600 transition-colors"
               >
                 Save to Log
               </button>
@@ -530,7 +532,7 @@ If no right-side messages are visible or none match the target month, return exa
                   setImageFile(null);
                   setPreviewUrl(null);
                 }}
-                className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition-colors"
+                className="btn-tactile flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition-colors"
               >
                 Discard
               </button>

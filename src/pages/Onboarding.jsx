@@ -138,7 +138,7 @@ export default function Onboarding({ onComplete }) {
           {step > 0 && (
             <button
               onClick={handleBack}
-              className="flex-1 px-4 py-4 rounded-2xl border-2 border-cream-200 text-gray-700 font-bold active:scale-[0.97] transition-transform duration-100"
+              className="btn-tactile flex-1 px-4 py-4 rounded-2xl border-2 border-cream-200 text-gray-700 font-bold transition-transform duration-100"
             >
               Back
             </button>
@@ -146,7 +146,7 @@ export default function Onboarding({ onComplete }) {
           <button
             onClick={handleNext}
             disabled={!isStepValid()}
-            className={`flex-[2] py-4 rounded-2xl font-bold text-white text-base shadow-orange active:scale-[0.97] transition-transform duration-100 flex items-center justify-center gap-2 ${
+            className={`btn-tactile flex-[2] py-4 rounded-2xl font-bold text-white text-base shadow-orange transition-transform duration-100 flex items-center justify-center gap-2 ${
               isStepValid()
                 ? 'bg-primary'
                 : 'bg-cream-300 cursor-not-allowed shadow-none'
@@ -212,7 +212,7 @@ function StepMealTypes({ meals, onToggle }) {
             <button
               key={mealType}
               onClick={() => onToggle(mealType)}
-              className="flex-1 flex flex-col items-center gap-2 py-5 rounded-3xl bg-primary-100 border-2 border-primary shadow-soft active:scale-[0.965] transition-transform"
+              className="btn-tactile flex-1 flex flex-col items-center gap-2 py-5 rounded-3xl bg-primary-100 border-2 border-primary shadow-soft transition-transform"
             >
               <span className="text-3xl">{mealEmoji}</span>
               <span className="font-bold text-sm text-primary">{mealLabel}</span>
@@ -221,7 +221,7 @@ function StepMealTypes({ meals, onToggle }) {
             <button
               key={mealType}
               onClick={() => onToggle(mealType)}
-              className="flex-1 flex flex-col items-center gap-2 py-5 rounded-3xl bg-cream-50 border-2 border-cream-200 active:scale-[0.965] transition-transform"
+              className="btn-tactile flex-1 flex flex-col items-center gap-2 py-5 rounded-3xl bg-cream-50 border-2 border-cream-200 transition-transform"
             >
               <span className="text-3xl opacity-50">{mealEmoji}</span>
               <span className="font-semibold text-sm text-gray-400">{mealLabel}</span>

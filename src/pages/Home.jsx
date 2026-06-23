@@ -19,6 +19,12 @@ export default function Home() {
   const todayOrders = getOrdersForDate(todayYMD);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [ripplingMeal, setRipplingMeal] = useState(null);
+  const [animState, setAnimState] = useState({}); // { [mealKey]: 'confirm' | 'skip' | null }
+
+  // Day vs night ambient animation
+  const hour = new Date().getHours();
+  const isDaytime = hour >= 6 && hour < 18;
+  const ambientClass = isDaytime ? 'animate-pulse-daylight' : 'animate-shimmer-night';
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -54,6 +60,8 @@ export default function Home() {
 
     if (!existing) {
       // State: no record → tap → log as ORDERED
+      setAnimState(prev => ({ ...prev, [mealKey]: 'confirm' }));
+      setTimeout(() => setAnimState(prev => ({ ...prev, [mealKey]: null })), 450);
       await logOrder({
         date:      todayYMD,
         mealType:  mealKey,
@@ -64,6 +72,8 @@ export default function Home() {
       });
     } else if (existing.ordered === true) {
       // State: ordered → tap → mark as SKIPPED
+      setAnimState(prev => ({ ...prev, [mealKey]: 'skip' }));
+      setTimeout(() => setAnimState(prev => ({ ...prev, [mealKey]: null })), 450);
       await logOrder({
         date:      todayYMD,
         mealType:  mealKey,
@@ -165,17 +175,18 @@ export default function Home() {
 
                 return (
                   <button
-                    key={meal}
+                    key={`${meal}-${animState[meal] || 'idle'}`}
                     onClick={() => handleMealTap(meal)}
                     style={{ animationDelay: `${index * 80}ms` }}
-                    className={`relative overflow-hidden w-full flex items-center justify-between
+                    className={`btn-tactile relative overflow-hidden w-full flex items-center justify-between
                                 rounded-3xl px-5 py-4 border animate-slide-up opacity-0 [animation-fill-mode:forwards]
-                                active:scale-[0.96] transition-all duration-[80ms] ease-out
+                                ${animState[meal] === 'confirm' ? 'animate-order-confirm' : ''}
+                                ${animState[meal] === 'skip'    ? 'animate-skip-shake'    : ''}
                                 ${isOrdered
                                   ? `${colors.border} meal-card-ordered ${colors.bg} shadow-neu-inset`
                                   : isSkipped
                                   ? 'border-transparent meal-card-skipped'
-                                  : 'border-white/10 meal-card-unordered'
+                                  : `border-white/10 meal-card-unordered ${ambientClass}`
                                 }`}
                   >
                     {/* Ripple effect */}
@@ -188,7 +199,8 @@ export default function Home() {
                       <span className="text-2xl">{mealInfo.emoji}</span>
                       <div className="text-left">
                         <p className={`font-display font-bold text-base
-                          ${!isOrdered && !isSkipped ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
+                          ${!isOrdered && !isSkipped ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}
+                          style={!isOrdered && !isSkipped ? { textShadow: '0 1px 3px rgba(0,0,0,0.35)' } : undefined}>
                           {mealInfo.label}
                         </p>
                         <p className={`font-sans font-medium text-sm
@@ -202,7 +214,7 @@ export default function Home() {
                         ? `${colors.text} ${colors.pill}`
                         : isSkipped
                         ? 'bg-white/10 text-white/50 line-through'
-                        : 'bg-white/20 text-white text-xs'
+                        : 'bg-black/35 backdrop-blur-[2px] text-white text-xs shadow-[0_1px_3px_rgba(0,0,0,0.4)]'
                     }`}>
                       {isOrdered ? 'Ordered ✓' : isSkipped ? 'Skipped' : 'Tap to order'}
                     </span>

@@ -29,7 +29,7 @@ export function BottomSheet({ isOpen, onClose, title, children }) {
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="btn-tactile p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X size={20} className="text-gray-500" />
           </button>

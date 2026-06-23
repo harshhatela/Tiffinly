@@ -6,10 +6,10 @@ export default function PageHeader({ title, subtitle }) {
   const { pathname }   = useLocation();
   const isHome         = pathname === '/';
   return (
-    <header className="bg-cream-100 dark:bg-[#0C0C0F] px-4 pt-12 pb-4
+    <header className="bg-white dark:bg-[#0C0C0F] px-4 pt-12 pb-4
                         sticky top-0 z-30
-                        border-b border-cream-200/50 dark:border-[#26262E]/50
-                        backdrop-blur-sm">
+                        border-b border-gray-100 dark:border-[#1F1F25]
+                        shadow-[0_1px_0_rgba(0,0,0,0.04)]">
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           {isHome ? (
@@ -38,14 +38,15 @@ export default function PageHeader({ title, subtitle }) {
         {isHome && (
           <button
             onClick={() => navigate('/settings')}
-            className="w-9 h-9 rounded-xl bg-cream-100 dark:bg-[#1F1F25]
+            className="btn-tactile w-9 h-9 rounded-xl bg-cream-100 dark:bg-[#1F1F25]
+                       border border-cream-200 dark:border-[#30303A]
                        shadow-neu-sm flex items-center justify-center ml-3 flex-shrink-0
                        active:shadow-neu-inset transition-all"
           >
             <Settings
               size={17}
-              className="text-gray-500 dark:text-gray-400"
-              strokeWidth={1.8}
+              className="text-gray-600 dark:text-gray-300"
+              strokeWidth={2}
             />
           </button>
         )}

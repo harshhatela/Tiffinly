@@ -98,7 +98,7 @@ export default function Reports() {
             <button
               key={m.value}
               onClick={() => setSelectedMonth(m.value)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-transform active:scale-[0.965] ${
+              className={`btn-tactile px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-transform ${
                 selectedMonth === m.value
                   ? 'bg-primary text-white shadow-orange'
                   : 'bg-cream-200 dark:bg-[#1F1F25] text-gray-500 dark:text-gray-400 border border-cream-300 dark:border-[#30303A]'
@@ -120,7 +120,7 @@ export default function Reports() {
             {/* Paid/Unpaid toggle */}
             <button
               onClick={handleTogglePaid}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-[0.965] ${
+              className={`btn-tactile px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                 paymentStatus.paid
                   ? 'bg-green-400 text-white shadow-sm'
                   : 'bg-white/20 text-white border border-white/30'
@@ -132,7 +132,7 @@ export default function Reports() {
           {/* Share button */}
           <button
             onClick={handleShare}
-            className="w-full py-2.5 rounded-2xl bg-white/15 border border-white/25 text-white font-semibold text-sm transition-transform active:scale-[0.965]"
+            className="btn-tactile w-full py-2.5 rounded-2xl bg-white/15 border border-white/25 text-white font-semibold text-sm transition-transform"
           >
             Share Summary ↗
           </button>

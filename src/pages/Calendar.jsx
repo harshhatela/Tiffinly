@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import { useSettings } from '../hooks/useSettings';
 import { useOrders } from '../hooks/useOrders';
@@ -121,7 +121,7 @@ export default function Calendar() {
           <div className="flex gap-2">
             <button
               onClick={handlePrevMonth}
-              className="w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
+              className="btn-tactile w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
                          shadow-neu-sm flex items-center justify-center
                          text-gray-600 dark:text-gray-400
                          active:shadow-neu-inset transition-all text-sm font-bold"
@@ -131,7 +131,7 @@ export default function Calendar() {
             <button
               onClick={handleNextMonth}
               disabled={isNextDisabled}
-              className="w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
+              className="btn-tactile w-9 h-9 rounded-full bg-cream-100 dark:bg-[#1F1F25]
                          shadow-neu-sm flex items-center justify-center
                          text-gray-600 dark:text-gray-400
                          active:shadow-neu-inset transition-all text-sm font-bold disabled:opacity-30 disabled:cursor-not-allowed"
@@ -258,6 +258,16 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
     dinner: dayOrders.find(o => o.mealType === 'dinner')?.ordered ?? null,
   });
 
+  // Re-sync state when date or orders change (fixes stale state on reopen/delete)
+  useEffect(() => {
+    const currentDayOrders = orders.filter(o => o.date === toYMD(date));
+    setMealStates({
+      breakfast: currentDayOrders.find(o => o.mealType === 'breakfast')?.ordered ?? null,
+      lunch: currentDayOrders.find(o => o.mealType === 'lunch')?.ordered ?? null,
+      dinner: currentDayOrders.find(o => o.mealType === 'dinner')?.ordered ?? null,
+    });
+  }, [date, orders]);
+
   const handleSetMealState = (mealType, newState) => {
     setMealStates(prev => ({ ...prev, [mealType]: newState }));
   };
@@ -336,7 +346,7 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
 
       <button
         onClick={handleSave}
-        className="w-full mt-6 bg-arty-gradient text-white py-4 rounded-3xl font-bold text-lg shadow-arty hover:shadow-arty-sm transition-all press-effect active:scale-95"
+        className="btn-tactile w-full mt-6 bg-arty-gradient text-white py-4 rounded-3xl font-bold text-lg shadow-arty hover:shadow-arty-sm transition-all"
       >
         Save Changes
       </button>

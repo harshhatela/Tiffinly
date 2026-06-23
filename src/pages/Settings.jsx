@@ -157,7 +157,7 @@ export default function Settings() {
                   saveSettings({ ...settings, serviceName: newName.trim() });
                 }
               }}
-              className="w-10 h-10 rounded-xl bg-cream-100 text-gray-500 flex items-center justify-center active:scale-[0.965] transition-transform"
+              className="btn-tactile w-10 h-10 rounded-xl bg-cream-100 text-gray-500 flex items-center justify-center transition-transform"
             >
               <PenLine size={18} />
             </button>
@@ -228,7 +228,7 @@ export default function Settings() {
                           handleMealPriceChange(meal, newPrice);
                         }
                       }}
-                      className="w-full py-2.5 rounded-2xl bg-cream-50 text-gray-700 font-bold text-sm border border-cream-200 active:scale-[0.965] transition-transform"
+                      className="btn-tactile w-full py-2.5 rounded-2xl bg-cream-50 text-gray-700 font-bold text-sm border border-cream-200 transition-transform"
                     >
                       Edit Price
                     </button>
@@ -250,8 +250,8 @@ export default function Settings() {
           {/* Export button */}
           <button
             onClick={handleExport}
-            className="w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-sm
-                       shadow-orange active:scale-[0.97] transition-transform mb-3"
+            className="btn-tactile w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-sm
+                       shadow-orange transition-transform mb-3"
           >
             ↓ Export Backup (.json)
           </button>
@@ -284,7 +284,7 @@ export default function Settings() {
           <h3 className="text-xs font-bold text-red-400 uppercase tracking-widest px-1">Danger Zone</h3>
           <button
             onClick={handleClearAllData}
-            className="w-full bg-red-50 rounded-2xl px-5 py-4 flex items-center gap-3 text-red-600 font-bold border border-red-100 active:scale-[0.965] transition-transform"
+            className="btn-tactile w-full bg-red-50 rounded-2xl px-5 py-4 flex items-center gap-3 text-red-600 font-bold border border-red-100 transition-transform"
           >
             <Trash2 size={20} className="text-red-400" />
             Clear All Data
@@ -296,7 +296,7 @@ export default function Settings() {
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Support</h3>
           <button
             onClick={() => navigate('/feedback')}
-            className="w-full bg-cream-100 shadow-neu rounded-2xl px-5 py-4 flex items-center justify-between text-gray-900 font-bold active:scale-[0.965] transition-transform"
+            className="btn-tactile w-full bg-cream-100 shadow-neu rounded-2xl px-5 py-4 flex items-center justify-between text-gray-900 font-bold transition-transform"
           >
             <div className="flex items-center gap-3">
               <MessageSquarePlus size={20} className="text-primary" />

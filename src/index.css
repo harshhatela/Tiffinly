@@ -51,6 +51,20 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   UNIVERSAL TACTILE BUTTON PRESS
+   Applied to every interactive button across the app
+   ═══════════════════════════════════════════════════ */
+.btn-tactile {
+  transition: transform 90ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 90ms ease-out,
+              filter 90ms ease-out;
+}
+.btn-tactile:active {
+  transform: scale(0.95) translateY(1px);
+  filter: brightness(0.96);
+}
+
 @layer utilities {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
