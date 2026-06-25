@@ -13,12 +13,9 @@ export default function PageHeader({ title, subtitle }) {
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           {isHome ? (
-            <img
-              src="/logo.png"
-              alt="Tiffinly"
-              className="h-7 object-contain object-left"
-              style={{ maxWidth: '120px' }}
-            />
+            <div className="bg-white dark:bg-[#1F1F25] rounded-xl px-2.5 py-1.5 shadow-neu-sm inline-flex items-center">
+              <img src="/logo.png" alt="Tiffinly" className="h-6 object-contain" />
+            </div>
           ) : (
             <>
               <h1 className="font-display font-bold text-xl text-gray-900
@@ -38,16 +35,12 @@ export default function PageHeader({ title, subtitle }) {
         {isHome && (
           <button
             onClick={() => navigate('/settings')}
-            className="btn-tactile w-9 h-9 rounded-xl bg-cream-100 dark:bg-[#1F1F25]
+            className="w-9 h-9 rounded-xl bg-white dark:bg-[#1F1F25]
                        border border-cream-200 dark:border-[#30303A]
                        shadow-neu-sm flex items-center justify-center ml-3 flex-shrink-0
                        active:shadow-neu-inset transition-all"
           >
-            <Settings
-              size={17}
-              className="text-gray-600 dark:text-gray-300"
-              strokeWidth={2}
-            />
+            <Settings size={18} className="text-gray-700 dark:text-gray-200" strokeWidth={2.2} />
           </button>
         )}
       </div>

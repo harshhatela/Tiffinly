@@ -1,39 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db, DEFAULT_SETTINGS } from '../db/db';
+import { supabase, isCloudEnabled } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 export function useSettings() {
+  const { user } = useAuth();
   const [settings, setSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        let s = await db.settings.get(1);
-        if (!s) {
-          await db.settings.add(DEFAULT_SETTINGS);
-          s = DEFAULT_SETTINGS;
-        }
-        setSettings(s);
-      } catch (err) {
-        console.error('Error loading settings:', err);
-        setSettings(DEFAULT_SETTINGS);
-      } finally {
-        setLoading(false);
+  const loadSettings = useCallback(async () => {
+    if (user && isCloudEnabled()) {
+      const { data, error } = await supabase
+        .from('profiles').select('*').eq('id', user.id).single();
+      if (!error && data) {
+        const mapped = {
+          id: 1,
+          serviceName:   data.service_name,
+          whatsappName:  data.whatsapp_name,
+          meals:         data.meals,
+          onboardingComplete: !!data.service_name,
+        };
+        setSettings(mapped);
+        await db.settings.put(mapped);
+      } else {
+        const cached = await db.settings.get(1);
+        setSettings(cached || DEFAULT_SETTINGS);
       }
-    };
-    loadSettings();
-  }, []);
+    } else {
+      const local = await db.settings.get(1);
+      setSettings(local || DEFAULT_SETTINGS);
+    }
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const saveSettings = async (partial) => {
-    try {
-      const updated = { ...settings, ...partial };
-      await db.settings.put(updated);
-      setSettings(updated);
-      return updated;
-    } catch (err) {
-      console.error('Error saving settings:', err);
+    const updated = { ...settings, ...partial };
+    setSettings(updated); // optimistic update
+
+    if (user && isCloudEnabled()) {
+      await supabase.from('profiles').update({
+        service_name:  updated.serviceName,
+        whatsapp_name: updated.whatsappName,
+        meals:         updated.meals,
+      }).eq('id', user.id);
     }
+    await db.settings.put(updated); // always cache locally too
   };
 
-  return { settings, loading, saveSettings };
+  return { settings, loading, saveSettings, refreshSettings: loadSettings };
 }

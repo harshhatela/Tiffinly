@@ -6,7 +6,6 @@ import { useSettings } from '../hooks/useSettings';
 import { useOrders } from '../hooks/useOrders';
 import { useMonthlyTotal } from '../hooks/useMonthlyTotal';
 import { formatDisplay, getGreeting, toYMD, toYM, formatCurrency } from '../utils/dateHelpers';
-import '../styles/MealCard.css';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ export default function Home() {
   // Day vs night ambient animation
   const hour = new Date().getHours();
   const isDaytime = hour >= 6 && hour < 18;
-  const ambientClass = isDaytime ? 'animate-pulse-daylight' : 'animate-shimmer-night';
+  const ambientClass = isDaytime ? 'animate-glow-day' : 'animate-glow-night';
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -178,18 +177,16 @@ export default function Home() {
                     key={`${meal}-${animState[meal] || 'idle'}`}
                     onClick={() => handleMealTap(meal)}
                     style={{ animationDelay: `${index * 80}ms` }}
-                    className={`btn-tactile relative overflow-hidden w-full flex items-center justify-between
-                                rounded-3xl px-5 py-4 border animate-slide-up opacity-0 [animation-fill-mode:forwards]
+                    className={`w-full flex items-center justify-between rounded-3xl px-5 py-4 btn-tactile animate-slide-up opacity-0 [animation-fill-mode:forwards] relative overflow-hidden
                                 ${animState[meal] === 'confirm' ? 'animate-order-confirm' : ''}
                                 ${animState[meal] === 'skip'    ? 'animate-skip-shake'    : ''}
                                 ${isOrdered
-                                  ? `${colors.border} meal-card-ordered ${colors.bg} shadow-neu-inset`
+                                  ? `bg-${meal}-bg shadow-neu border border-${meal}-ring/20`
                                   : isSkipped
-                                  ? 'border-transparent meal-card-skipped'
-                                  : `border-white/10 meal-card-unordered ${ambientClass}`
+                                  ? 'bg-cream-50 dark:bg-[#111114] shadow-neu-sm opacity-60'
+                                  : `bg-white dark:bg-[#17171B] shadow-neu border border-cream-200 dark:border-[#26262E] ${ambientClass}`
                                 }`}
                   >
-                    {/* Ripple effect */}
                     {ripplingMeal === meal && (
                       <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <span className="w-8 h-8 rounded-full bg-primary/30 animate-ripple" />
@@ -198,26 +195,27 @@ export default function Home() {
                     <div className="flex items-center gap-3 relative z-10">
                       <span className="text-2xl">{mealInfo.emoji}</span>
                       <div className="text-left">
-                        <p className={`font-display font-bold text-base
-                          ${!isOrdered && !isSkipped ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}
-                          style={!isOrdered && !isSkipped ? { textShadow: '0 1px 3px rgba(0,0,0,0.35)' } : undefined}>
+                        <p className="font-display font-bold text-base text-gray-900 dark:text-gray-100">
                           {mealInfo.label}
                         </p>
-                        <p className={`font-sans font-medium text-sm
-                          ${!isOrdered && !isSkipped ? 'text-white/70' : 'text-gray-400'}`}>
+                        <p className="font-sans font-medium text-sm text-gray-400">
                           {formatCurrency(mealInfo.price)}
                         </p>
                       </div>
                     </div>
-                    <span key={state} className={`text-sm font-semibold font-sans px-3 py-1.5 rounded-full relative z-10 animate-pop-in ${
-                      isOrdered
-                        ? `${colors.text} ${colors.pill}`
-                        : isSkipped
-                        ? 'bg-white/10 text-white/50 line-through'
-                        : 'bg-black/35 backdrop-blur-[2px] text-white text-xs shadow-[0_1px_3px_rgba(0,0,0,0.4)]'
-                    }`}>
-                      {isOrdered ? 'Ordered ✓' : isSkipped ? 'Skipped' : 'Tap to order'}
-                    </span>
+                    {isOrdered ? (
+                      <span className={`text-xs font-semibold font-sans px-3 py-1.5 rounded-full bg-${meal}-pill text-${meal}-text relative z-10 animate-pop-in`}>
+                        Ordered ✓
+                      </span>
+                    ) : isSkipped ? (
+                      <span className="text-xs font-semibold font-sans px-3 py-1.5 rounded-full bg-cream-200 dark:bg-[#1F1F25] text-gray-400 line-through relative z-10 animate-pop-in">
+                        Skipped
+                      </span>
+                    ) : (
+                      <span className="text-xs font-semibold font-sans px-3 py-1.5 rounded-full bg-cream-100 dark:bg-[#1F1F25] text-gray-400 relative z-10 animate-pop-in">
+                        Tap to order
+                      </span>
+                    )}
                   </button>
                 );
               })}

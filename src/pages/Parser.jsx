@@ -6,6 +6,7 @@ import { parseWhatsAppChat } from '../utils/waParser';
 import { toYM, toYMD, formatCurrency } from '../utils/dateHelpers';
 import { InfoIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { Toast } from '../components/ui/Toast';
+import { supabase, isCloudEnabled } from '../lib/supabase';
 
 const MONTHS = Array.from({ length: 6 }, (_, i) => {
   const d = new Date();
@@ -88,12 +89,8 @@ export default function Parser() {
   const handleImageAnalyse = async () => {
     if (!imageFile || !settings?.whatsappName) return;
 
-    // Check if API is accessible (no-cors check)
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    if (!apiKey) {
-      setParseError(
-        'Google Gemini API key not configured. Add VITE_GEMINI_API_KEY to .env.local — get one free at aistudio.google.com.'
-      );
+    if (!isCloudEnabled()) {
+      setParseError('Image import requires cloud sync to be configured. Use Text Import instead.');
       setIsAnalysing(false);
       return;
     }
@@ -138,39 +135,12 @@ Respond ONLY with a valid JSON array. No explanation, no markdown fences, no ext
 
 If no right-side messages are visible or none match the target month, return exactly: []`;
 
-      const GEMINI_MODEL = 'gemini-1.5-flash';
-      const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
-      const response = await fetch(GEMINI_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                inline_data: {
-                  mime_type: mediaType,
-                  data: base64,
-                },
-              },
-              {
-                text: visionPrompt,
-              },
-            ],
-          }],
-          generationConfig: {
-            temperature:     0.1,
-            maxOutputTokens: 1024,
-          },
-        }),
+      const { data, error } = await supabase.functions.invoke('analyze-chat-image', {
+        body: { base64Image: base64, mimeType: mediaType, prompt: visionPrompt },
       });
 
-      if (!response.ok) {
-        const errBody = await response.json().catch(() => ({}));
-        throw new Error(`API error: ${response.status} — ${errBody?.error?.message || 'Unknown'}`);
-      }
+      if (error) throw new Error(error.message);
 
-      const data = await response.json();
       const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
 
       // Strip any markdown fences if present
@@ -381,20 +351,10 @@ If no right-side messages are visible or none match the target month, return exa
             {activeTab === 'image' && (
               <div className="flex flex-col items-center gap-4">
                 {/* API Key Warning */}
-                {!import.meta.env.VITE_GEMINI_API_KEY && (
+                {!isCloudEnabled() && (
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4 w-full">
                     <p className="text-amber-700 text-xs font-semibold">
-                      ⚠️ Image analysis needs a free API key.{' '}
-                      <a
-                        href="https://aistudio.google.com/apikey"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        Get one free at aistudio.google.com
-                      </a>{' '}
-                      then add <code className="bg-amber-100 px-1 rounded">VITE_GEMINI_API_KEY</code> to{' '}
-                      <code className="bg-amber-100 px-1 rounded">.env.local</code>.
+                      ⚠️ Image import requires cloud sync to be configured. Use Text Import instead.
                     </p>
                   </div>
                 )}

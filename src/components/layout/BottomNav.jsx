@@ -40,7 +40,7 @@ export default function BottomNav() {
             width:      'calc(25% - 12px)',
             top:        '6px',
             left:       `calc(${safeIdx} * 25% + 6px)`,
-            transition: 'left 320ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+            transition: 'left 280ms cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         />
 
@@ -59,8 +59,8 @@ export default function BottomNav() {
               <tab.Icon
                 size={isActive ? 17 : 19}
                 strokeWidth={isActive ? 2.5 : 1.5}
-                className={`transition-colors duration-200 flex-shrink-0
-                  ${isActive ? 'text-white' : 'text-gray-500'}`}
+                className={`transition-all duration-200 flex-shrink-0
+                  ${isActive ? 'text-white scale-110' : 'text-gray-500 scale-100'}`}
               />
               {/*
                * Label only shows for active tab.

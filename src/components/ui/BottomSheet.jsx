@@ -18,12 +18,12 @@ export function BottomSheet({ isOpen, onClose, title, children }) {
     <div className={`fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/70 dark:bg-black/85 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div className={`absolute bottom-0 left-0 right-0 bg-cream-50 rounded-t-4xl shadow-neu-lg max-w-[430px] mx-auto transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+      <div className={`absolute bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#17171B] rounded-t-4xl shadow-neu-lg max-w-[430px] mx-auto transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
         {/* Handle and header */}
         <div className="flex justify-between items-center p-4 border-b border-cream-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>

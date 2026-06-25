@@ -10,6 +10,7 @@ import Reports   from './pages/Reports';
 import Settings  from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Feedback   from './pages/Feedback';
+import Account    from './pages/Account';
 
 function AppRoutes() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function AppRoutes() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

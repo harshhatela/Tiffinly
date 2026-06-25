@@ -9,12 +9,16 @@ import { formatCurrency } from '../utils/dateHelpers';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useState } from 'react';
 import { Toast } from '../components/ui/Toast';
+import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
   const navigate = useNavigate();
   const { settings, saveSettings, loading } = useSettings();
   const { theme, toggleTheme } = useTheme();
   const [toast, setToast] = useState(null);
+  const [editingMeal, setEditingMeal] = useState(null);
+  const [editPriceValue, setEditPriceValue] = useState('');
+  const { user, cloudEnabled } = useAuth();
 
   if (loading) {
     return (
@@ -65,6 +69,26 @@ export default function Settings() {
         },
       },
     });
+  };
+
+  const startEditPrice = (mealKey) => {
+    setEditingMeal(mealKey);
+    setEditPriceValue(String(settings.meals[mealKey].price));
+  };
+
+  const savePriceEdit = async () => {
+    const parsed = parseInt(editPriceValue, 10);
+    if (isNaN(parsed) || parsed < 0) {
+      setEditingMeal(null);
+      return;
+    }
+    await saveSettings({
+      meals: {
+        ...settings.meals,
+        [editingMeal]: { ...settings.meals[editingMeal], price: parsed },
+      },
+    });
+    setEditingMeal(null);
   };
 
   const handleExport = async () => {
@@ -139,6 +163,23 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        {/* Account Section */}
+        {cloudEnabled && (
+          <button onClick={() => navigate('/account')}
+            className="btn-tactile w-full bg-white dark:bg-[#17171B] shadow-neu rounded-3xl
+                       p-5 mb-4 flex items-center justify-between text-left transition-transform">
+            <div>
+              <p className="font-display font-bold text-base text-gray-900 dark:text-gray-100">
+                {user ? 'Account' : 'Sign In / Sign Up'}
+              </p>
+              <p className="font-sans text-xs text-gray-400 mt-0.5">
+                {user ? user.email : 'Sync your data across devices'}
+              </p>
+            </div>
+            <span className="text-gray-400">→</span>
+          </button>
+        )}
 
         {/* Profile Section */}
         <div className="bg-cream-100 shadow-neu rounded-3xl p-5 mb-4">
@@ -221,17 +262,42 @@ export default function Settings() {
 
                 {isMealEnabled && (
                   <div className="mt-4 pt-4 border-t border-cream-200 animate-slideDown">
-                    <button
-                      onClick={() => {
-                        const newPrice = prompt(`Enter new price for ${mealInfo.label || meal}:`, mealInfo.price);
-                        if (newPrice !== null && !isNaN(newPrice)) {
-                          handleMealPriceChange(meal, newPrice);
-                        }
-                      }}
-                      className="btn-tactile w-full py-2.5 rounded-2xl bg-cream-50 text-gray-700 font-bold text-sm border border-cream-200 transition-transform"
-                    >
-                      Edit Price
-                    </button>
+                    {editingMeal === meal ? (
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2
+                                           font-display font-bold text-gray-400">₹</span>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            value={editPriceValue}
+                            onChange={(e) => setEditPriceValue(e.target.value.replace(/^0+(?=\d)/, ''))}
+                            onFocus={(e) => e.target.select()}
+                            autoFocus
+                            className="w-full bg-cream-50 dark:bg-[#111114] border-2 border-primary
+                                       rounded-2xl pl-8 pr-4 py-3 font-display font-bold text-lg
+                                       text-gray-900 dark:text-gray-100 focus:outline-none"
+                          />
+                        </div>
+                        <button onClick={savePriceEdit}
+                          className="btn-tactile px-4 py-3 rounded-2xl bg-primary text-white
+                                     font-sans font-bold text-sm shadow-orange">
+                          Save
+                        </button>
+                        <button onClick={() => setEditingMeal(null)}
+                          className="btn-tactile px-3 py-3 rounded-2xl bg-cream-100 dark:bg-[#1F1F25]
+                                     text-gray-400 text-sm">
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEditPrice(meal)}
+                        className="btn-tactile w-full py-3 rounded-2xl bg-cream-100 dark:bg-[#1F1F25]
+                                   shadow-neu-sm text-gray-600 dark:text-gray-300 font-sans
+                                   font-semibold text-sm active:shadow-neu-inset transition-all">
+                        Edit Price · {formatCurrency(mealInfo.price)}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

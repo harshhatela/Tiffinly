@@ -249,51 +249,29 @@ export default function Calendar() {
 }
 
 function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDelete }) {
-  const dateStr = toYMD(date);
-  const dayOrders = orders.filter(o => o.date === dateStr);
+  const [dayOrders, setDayOrders] = useState([]);
 
-  const [mealStates, setMealStates] = useState({
-    breakfast: dayOrders.find(o => o.mealType === 'breakfast')?.ordered ?? null,
-    lunch: dayOrders.find(o => o.mealType === 'lunch')?.ordered ?? null,
-    dinner: dayOrders.find(o => o.mealType === 'dinner')?.ordered ?? null,
-  });
-
-  // Re-sync state when date or orders change (fixes stale state on reopen/delete)
   useEffect(() => {
-    const currentDayOrders = orders.filter(o => o.date === toYMD(date));
-    setMealStates({
-      breakfast: currentDayOrders.find(o => o.mealType === 'breakfast')?.ordered ?? null,
-      lunch: currentDayOrders.find(o => o.mealType === 'lunch')?.ordered ?? null,
-      dinner: currentDayOrders.find(o => o.mealType === 'dinner')?.ordered ?? null,
-    });
+    if (!date) return;
+    const dateStr = toYMD(date);
+    const filtered = orders.filter(o => o.date === dateStr);
+    setDayOrders(filtered);
   }, [date, orders]);
 
-  const handleSetMealState = (mealType, newState) => {
-    setMealStates(prev => ({ ...prev, [mealType]: newState }));
+  const handleSetMealState = async (mealKey, ordered) => {
+    const dateStr = toYMD(date);
+    const price = settings.meals[mealKey].price;
+    await onSave({
+      date: dateStr, mealType: mealKey, ordered,
+      isHoliday: false,
+      amount: ordered ? price : 0,
+      source: 'manual',
+    });
   };
 
   const handleDeleteMealRecord = async (mealKey) => {
     const existing = dayOrders.find(o => o.mealType === mealKey);
-    if (existing && onDelete) {
-      await onDelete(existing.id);
-    }
-    setMealStates(prev => ({ ...prev, [mealKey]: null }));
-  };
-
-  const handleSave = async () => {
-    for (const meal of Object.keys(mealStates)) {
-      if (settings.meals[meal].enabled && mealStates[meal] !== null) {
-        await onSave({
-          date: dateStr,
-          mealType: meal,
-          ordered: mealStates[meal],
-          isHoliday: false,
-          amount: settings.meals[meal].price,
-          source: 'manual',
-        });
-      }
-    }
-    onClose();
+    if (existing && onDelete) await onDelete(existing.id);
   };
 
   return (
@@ -310,7 +288,7 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
         {Object.keys(settings.meals)
           .filter(meal => settings.meals[meal].enabled)
           .map(meal => {
-            const existingOrder = { ordered: mealStates[meal] };
+            const existingOrder = dayOrders.find(o => o.mealType === meal);
             return (
               <div key={meal} className="bg-cream-50 p-4 rounded-3xl border border-cream-200">
                 <label className="block text-sm font-bold text-gray-900 px-1">
@@ -332,7 +310,7 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
                   </button>
                   <button
                     onClick={() => handleDeleteMealRecord(meal)}
-                    disabled={existingOrder?.ordered === null}
+                    disabled={!existingOrder || existingOrder.ordered === null}
                     className="ep133-btn-delete flex-shrink-0"
                     aria-label="Delete"
                   >
@@ -345,10 +323,10 @@ function DayDetailSheet({ date, settings, orders, isOpen, onClose, onSave, onDel
       </div>
 
       <button
-        onClick={handleSave}
+        onClick={onClose}
         className="btn-tactile w-full mt-6 bg-arty-gradient text-white py-4 rounded-3xl font-bold text-lg shadow-arty hover:shadow-arty-sm transition-all"
       >
-        Save Changes
+        Done
       </button>
     </BottomSheet>
   );
